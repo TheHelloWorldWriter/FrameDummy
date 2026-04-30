@@ -231,7 +231,6 @@ public partial class SettingsForm
         // _titleTextBox
         _titleTextBox.Margin = new Padding(3, 0, 0, 12);
         _titleTextBox.Size = new Size(430, 22);
-        _titleTextBox.TextChanged += OnTitleChanged;
 
         // _iconLabel
         _iconLabel.AutoSize = true;
@@ -272,7 +271,6 @@ public partial class SettingsForm
         _borderComboBox.Margin = new Padding(3, 0, 0, 20);
         _borderComboBox.Size = new Size(430, 24);
         foreach (FormBorderStyle style in Enum.GetValues<FormBorderStyle>()) _borderComboBox.Items.Add(style);
-        _borderComboBox.SelectedIndexChanged += OnBorderChanged;
 
         // _opacityLabel
         _opacityLabel.AutoSize = true;
@@ -286,49 +284,42 @@ public partial class SettingsForm
         _opacityTrackBar.Size = new Size(438, 56);
         _opacityTrackBar.TickFrequency = 2;
         _opacityTrackBar.Value = 100;
-        _opacityTrackBar.ValueChanged += OnOpacityChanged;
 
         // _controlBoxCheck
         _controlBoxCheck.AutoSize = true;
         _controlBoxCheck.MinimumSize = new Size(160, 0);
         _controlBoxCheck.Text = Strings.CheckControlBox;
         _controlBoxCheck.UseVisualStyleBackColor = true;
-        _controlBoxCheck.CheckedChanged += OnControlBoxChanged;
 
         // _showIconCheck
         _showIconCheck.AutoSize = true;
         _showIconCheck.MinimumSize = new Size(160, 0);
         _showIconCheck.Text = Strings.CheckShowIcon;
         _showIconCheck.UseVisualStyleBackColor = true;
-        _showIconCheck.CheckedChanged += OnShowIconChanged;
 
         // _minimizeBoxCheck
         _minimizeBoxCheck.AutoSize = true;
         _minimizeBoxCheck.MinimumSize = new Size(160, 0);
         _minimizeBoxCheck.Text = Strings.CheckMinimizeBox;
         _minimizeBoxCheck.UseVisualStyleBackColor = true;
-        _minimizeBoxCheck.CheckedChanged += OnMinimizeBoxChanged;
 
         // _maximizeBoxCheck
         _maximizeBoxCheck.AutoSize = true;
         _maximizeBoxCheck.MinimumSize = new Size(160, 0);
         _maximizeBoxCheck.Text = Strings.CheckMaximizeBox;
         _maximizeBoxCheck.UseVisualStyleBackColor = true;
-        _maximizeBoxCheck.CheckedChanged += OnMaximizeBoxChanged;
 
         // _showInTaskbarCheck
         _showInTaskbarCheck.AutoSize = true;
         _showInTaskbarCheck.MinimumSize = new Size(160, 0);
         _showInTaskbarCheck.Text = Strings.CheckShowInTaskbar;
         _showInTaskbarCheck.UseVisualStyleBackColor = true;
-        _showInTaskbarCheck.CheckedChanged += OnShowInTaskbarChanged;
 
         // _topmostCheck
         _topmostCheck.AutoSize = true;
         _topmostCheck.MinimumSize = new Size(160, 0);
         _topmostCheck.Text = Strings.CheckTopmost;
         _topmostCheck.UseVisualStyleBackColor = true;
-        _topmostCheck.CheckedChanged += OnTopmostChanged;
 
         _frameTabPage.Controls.Add(_frameFLP);
     }
@@ -396,7 +387,6 @@ public partial class SettingsForm
         _imageSizingComboBox.Size = new Size(336, 24);
         foreach (PictureBoxSizeMode mode in Enum.GetValues<PictureBoxSizeMode>())
             if (mode != PictureBoxSizeMode.AutoSize) _imageSizingComboBox.Items.Add(mode);
-        _imageSizingComboBox.SelectedIndexChanged += OnImageSizingChanged;
 
         // _autoSizeButton (height matches the Sizing combo box to its left)
         _autoSizeButton.AutoSize = false;
@@ -416,7 +406,6 @@ public partial class SettingsForm
         _colorValueLabel.BackColor = Color.LightSlateGray;
         _colorValueLabel.Margin = new Padding(3, 0, 3, 4);
         _colorValueLabel.Size = new Size(429, 22);
-        _colorValueLabel.BackColorChanged += OnColorValueChanged;
 
         // _colorBrowseButton
         _colorBrowseButton.AutoSize = false;
@@ -439,7 +428,6 @@ public partial class SettingsForm
         _colorTransparentCheck.Margin = new Padding(6, 4, 3, 0);
         _colorTransparentCheck.Text = Strings.CheckColorTransparent;
         _colorTransparentCheck.UseVisualStyleBackColor = true;
-        _colorTransparentCheck.CheckedChanged += OnColorTransparentChanged;
 
         _contentTabPage.Controls.Add(_contentFLP);
     }
@@ -471,7 +459,6 @@ public partial class SettingsForm
         // _commandTextBox
         _commandTextBox.Margin = new Padding(3, 3, 0, 15);
         _commandTextBox.Size = new Size(516, 22);
-        _commandTextBox.TextChanged += OnCommandChanged;
 
         // _prankIntroLabel
         _prankIntroLabel.AutoSize = true;
@@ -482,19 +469,16 @@ public partial class SettingsForm
         _prankNoRightClickCheck.AutoSize = true;
         _prankNoRightClickCheck.Text = Strings.CheckPrankNoRightClick;
         _prankNoRightClickCheck.UseVisualStyleBackColor = true;
-        _prankNoRightClickCheck.CheckedChanged += OnPrankNoRightClickChanged;
 
         // _prankNoHotkeyCheck
         _prankNoHotkeyCheck.AutoSize = true;
         _prankNoHotkeyCheck.Text = Strings.CheckPrankNoHotkey;
         _prankNoHotkeyCheck.UseVisualStyleBackColor = true;
-        _prankNoHotkeyCheck.CheckedChanged += OnPrankNoHotkeyChanged;
 
         // _prankNoCloseCheck
         _prankNoCloseCheck.AutoSize = true;
         _prankNoCloseCheck.Text = Strings.CheckPrankNoClose;
         _prankNoCloseCheck.UseVisualStyleBackColor = true;
-        _prankNoCloseCheck.CheckedChanged += OnPrankNoCloseChanged;
 
         _prankTabPage.Controls.Add(_prankFLP);
     }

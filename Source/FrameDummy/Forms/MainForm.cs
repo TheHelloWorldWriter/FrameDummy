@@ -3,7 +3,6 @@
 
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Text.Json;
 
 using Windows.Win32;
 using Windows.Win32.UI.WindowsAndMessaging;
@@ -12,13 +11,15 @@ namespace FrameDummy;
 
 /// <summary>
 /// The main FrameDummy frame: a top-level window that looks and behaves like a real one and shows an image
-/// or solid color (with optional click-through transparency). Owns the persisted Settings record and applies
-/// it to the form on load; saves it on close. Hosts the modeless SettingsForm for live editing.
+/// or solid color (with optional click-through transparency). Holds a reference to the shared Settings VM
+/// (loaded by Program before constructing the form), binds Form properties to it, and listens for changes
+/// to the two side-effect properties (IconPath, ImagePath) via a small PropertyChanged dispatcher. Hosts
+/// the modeless SettingsForm for live editing.
 /// </summary>
 public class MainForm : Form
 {
-    /// <summary>The currently active settings. Replaced via with-expression on every change.</summary>
-    Settings _settings = new();
+    /// <summary>Shared settings model; both forms hold a reference to the same instance.</summary>
+    readonly Settings _vm;
 
     /// <summary>Default frame icon, extracted once from the .exe at construction. Restored when the user clears a custom icon.</summary>
     Icon? _defaultIcon;
@@ -29,16 +30,31 @@ public class MainForm : Form
     /// <summary>The single child PictureBox that fills the form and renders the image / background color.</summary>
     PictureBox _pictureBox = null!;
 
-    /// <summary>The settings dialog. Lazily created on first toggle; hidden (not closed) on user close.</summary>
-    SettingsForm? _settingsForm;
+    /// <summary>The settings dialog. Created eagerly in the constructor; hidden (not closed) on user close.</summary>
+    readonly SettingsForm _settingsForm = null!;
 
-    /// <summary>Initializes the main form: builds layout, extracts the default icon from the .exe.</summary>
-    public MainForm()
+    /// <summary>Last successfully loaded icon path; used to revert <see cref="Settings.IconPath"/> when a load fails.</summary>
+    string _lastValidIconPath = string.Empty;
+
+    /// <summary>Last successfully loaded image path (or the PastedImage sentinel); used to revert on load failure.</summary>
+    string _lastValidImagePath = string.Empty;
+
+    /// <summary>Re-entry guard during a path-revert: blocks the dispatcher from re-attempting a load while we're rolling back a failed one.</summary>
+    bool _applyingPath;
+
+    /// <summary>Initializes the main form: builds layout, creates the SettingsForm, wires bindings, subscribes to VM PropertyChanged.</summary>
+    public MainForm(Settings vm)
     {
+        _vm = vm;
         BuildLayout();
+        _settingsForm = new SettingsForm(_vm, this);
+        WireBindings();
+
+        // Subscribe AFTER bindings so the dispatcher doesn't fire during the initial bind-time push.
+        _vm.PropertyChanged += OnVmPropertyChanged;
     }
 
-    /// <summary>Configures form-level properties and the single PictureBox child. No settings applied here; that happens in OnLoad.</summary>
+    /// <summary>Configures form-level properties and the single PictureBox child. No settings applied here; bindings handle that in the constructor, OnLoad applies the side-effect properties.</summary>
     void BuildLayout()
     {
         AccessibleName = "FrameDummy";
@@ -80,20 +96,33 @@ public class MainForm : Form
         Controls.Add(_pictureBox);
     }
 
-    /// <summary>Fires before the form is first painted. Loads settings from disk and applies them so there is no flicker between defaults and loaded state.</summary>
+    /// <summary>Connects Form properties to VM properties. One-way (VM is the source of truth); these Form properties are not user-editable from this form.</summary>
+    void WireBindings()
+    {
+        DataBindings.Add(nameof(Text), _vm, nameof(Settings.Title));
+        DataBindings.Add(nameof(FormBorderStyle), _vm, nameof(Settings.Border));
+        DataBindings.Add(nameof(Opacity), _vm, nameof(Settings.OpacityFraction));
+        DataBindings.Add(nameof(ControlBox), _vm, nameof(Settings.ControlBox));
+        DataBindings.Add(nameof(ShowIcon), _vm, nameof(Settings.ShowIcon));
+        DataBindings.Add(nameof(MinimizeBox), _vm, nameof(Settings.MinimizeBox));
+        DataBindings.Add(nameof(MaximizeBox), _vm, nameof(Settings.MaximizeBox));
+        DataBindings.Add(nameof(ShowInTaskbar), _vm, nameof(Settings.ShowInTaskbar));
+        DataBindings.Add(nameof(TopMost), _vm, nameof(Settings.TopMost));
+        DataBindings.Add(nameof(BackColor), _vm, nameof(Settings.Color));
+        DataBindings.Add(nameof(TransparencyKey), _vm, nameof(Settings.EffectiveTransparencyKey));
+        DataBindings.Add(nameof(Cursor), _vm, nameof(Settings.EffectiveCursor));
+        _pictureBox.DataBindings.Add(nameof(PictureBox.BackColor), _vm, nameof(Settings.Color));
+        _pictureBox.DataBindings.Add(nameof(PictureBox.SizeMode), _vm, nameof(Settings.ImageSizing));
+    }
+
+    /// <summary>Fires before the form is first painted. Applies the side-effect VM properties (icon, image, window bounds, maximized state) that aren't covered by data-bindings.</summary>
     protected override void OnLoad(EventArgs e)
     {
         base.OnLoad(e);
-
-        try
-        {
-            var loaded = SettingsStore.Load();
-            _settings = Apply(_settings, loaded);
-        }
-        catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
-        {
-            ShowError(string.Format(Strings.SettingsLoadErrorFormat, ex.Message));
-        }
+        ApplyIcon();
+        ApplyImage();
+        if (_vm.Bounds is { } b) Bounds = new Rectangle(b.X, b.Y, b.Width, b.Height);
+        if (_vm.Maximized) WindowState = FormWindowState.Maximized;
     }
 
     /// <summary>Fires before the form actually closes. Honors prank-no-close, captures bounds, and saves settings.</summary>
@@ -102,7 +131,7 @@ public class MainForm : Form
         base.OnFormClosing(e);
         if (e.Cancel) return;
 
-        if (_settings.PrankNoClose)
+        if (_vm.PrankNoClose)
         {
             e.Cancel = true;
             return;
@@ -110,15 +139,12 @@ public class MainForm : Form
 
         // Capture window bounds and maximized flag before saving so the next launch restores them.
         var bounds = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
-        _settings = _settings with
-        {
-            Bounds = new WindowBounds(bounds.X, bounds.Y, bounds.Width, bounds.Height),
-            Maximized = WindowState == FormWindowState.Maximized,
-        };
+        _vm.Bounds = new WindowBounds(bounds.X, bounds.Y, bounds.Width, bounds.Height);
+        _vm.Maximized = WindowState == FormWindowState.Maximized;
 
         try
         {
-            SettingsStore.Save(_settings);
+            SettingsStore.Save(_vm);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
@@ -144,86 +170,81 @@ public class MainForm : Form
         base.Dispose(disposing);
     }
 
-    /// <summary>
-    /// Applies a delta from prev to next: writes form properties unconditionally (cheap), reloads icon/image only if the path changed,
-    /// and reverts paths on load failure (returning the actually-applied Settings). The caller stores the return value as the new state.
-    /// </summary>
-    Settings Apply(Settings prev, Settings next)
+    /// <summary>Dispatches the two side-effect VM properties (paths to disk-backed resources) that bindings can't handle.</summary>
+    void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        var result = next;
-
-        Text = next.Title;
-        FormBorderStyle = next.Border;
-        Opacity = next.Opacity / 100.0;
-        ControlBox = next.ControlBox;
-        ShowIcon = next.ShowIcon;
-        MinimizeBox = next.MinimizeBox;
-        MaximizeBox = next.MaximizeBox;
-        ShowInTaskbar = next.ShowInTaskbar;
-        TopMost = next.TopMost;
-        Cursor = string.IsNullOrEmpty(next.PrankCommand) ? Cursors.Default : Cursors.Hand;
-        _pictureBox.SizeMode = next.ImageSizing;
-
-        var color = ColorTranslator.FromHtml(next.Color);
-        BackColor = color;
-        _pictureBox.BackColor = color;
-        TransparencyKey = next.ColorTransparent ? color : Color.Empty;
-
-        if (prev.IconPath != next.IconPath)
+        if (_applyingPath) return;
+        switch (e.PropertyName)
         {
-            if (string.IsNullOrEmpty(next.IconPath))
-            {
-                _customIcon?.Dispose();
-                _customIcon = null;
-                if (_defaultIcon is not null) Icon = _defaultIcon;
-            }
-            else
-            {
-                try { LoadIcon(next.IconPath); }
-                catch (Exception ex) when (ex is IOException or ArgumentException or FileNotFoundException)
-                {
-                    ShowError(string.Format(Strings.IconLoadErrorFormat, next.IconPath));
-                    result = result with { IconPath = prev.IconPath };
-                }
-            }
+            case nameof(Settings.IconPath): ApplyIcon(); break;
+            case nameof(Settings.ImagePath): ApplyImage(); break;
         }
-
-        if (prev.ImagePath != next.ImagePath)
-        {
-            if (string.IsNullOrEmpty(next.ImagePath))
-            {
-                SetImage(null);
-            }
-            else if (next.ImagePath != Strings.PastedImage)
-            {
-                try { LoadImage(next.ImagePath); }
-                catch (FileNotFoundException)
-                {
-                    ShowError(string.Format(Strings.ImageNotFoundErrorFormat, next.ImagePath));
-                    result = result with { ImagePath = prev.ImagePath };
-                }
-                catch (OutOfMemoryException)
-                {
-                    ShowError(string.Format(Strings.ImageLoadErrorFormat, next.ImagePath));
-                    result = result with { ImagePath = prev.ImagePath };
-                }
-            }
-        }
-
-        // Bounds and Maximized only apply on initial load - the dialog never edits them.
-        if (prev.Bounds is null && next.Bounds is { } b) Bounds = new Rectangle(b.X, b.Y, b.Width, b.Height);
-        if (!prev.Maximized && next.Maximized) WindowState = FormWindowState.Maximized;
-
-        return result;
     }
 
-    /// <summary>Callback invoked by SettingsForm on every user edit. Applies the delta and reflects any reverts back to the dialog.</summary>
-    void OnSettingsChanged(Settings newSettings)
+    /// <summary>Applies the current IconPath: restores the default icon when empty; loads from disk otherwise. On load failure, shows an error and reverts the VM property to the last good path.</summary>
+    void ApplyIcon()
     {
-        var prev = _settings;
-        _settings = Apply(prev, newSettings);
-        // If Apply reverted a path due to load failure, push the corrected state back to the dialog.
-        if (!_settings.Equals(newSettings)) _settingsForm?.Refresh(_settings);
+        var path = _vm.IconPath;
+        if (string.IsNullOrEmpty(path))
+        {
+            _customIcon?.Dispose();
+            _customIcon = null;
+            if (_defaultIcon is not null) Icon = _defaultIcon;
+            _lastValidIconPath = string.Empty;
+            return;
+        }
+
+        try
+        {
+            LoadIcon(path);
+            _lastValidIconPath = path;
+        }
+        catch (Exception ex) when (ex is IOException or ArgumentException or FileNotFoundException)
+        {
+            ShowError(string.Format(Strings.IconLoadErrorFormat, path));
+            _applyingPath = true;
+            try { _vm.IconPath = _lastValidIconPath; }
+            finally { _applyingPath = false; }
+        }
+    }
+
+    /// <summary>Applies the current ImagePath: clears when empty; skips when the PastedImage sentinel is set (image already on the PictureBox); loads from disk otherwise. Reverts on load failure.</summary>
+    void ApplyImage()
+    {
+        var path = _vm.ImagePath;
+        if (string.IsNullOrEmpty(path))
+        {
+            SetImage(null);
+            _lastValidImagePath = string.Empty;
+            return;
+        }
+
+        if (path == Strings.PastedImage)
+        {
+            // Image is already on the PictureBox - the paste handler set it directly before flipping the path sentinel.
+            _lastValidImagePath = path;
+            return;
+        }
+
+        try
+        {
+            LoadImage(path);
+            _lastValidImagePath = path;
+        }
+        catch (FileNotFoundException)
+        {
+            ShowError(string.Format(Strings.ImageNotFoundErrorFormat, path));
+            _applyingPath = true;
+            try { _vm.ImagePath = _lastValidImagePath; }
+            finally { _applyingPath = false; }
+        }
+        catch (OutOfMemoryException)
+        {
+            ShowError(string.Format(Strings.ImageLoadErrorFormat, path));
+            _applyingPath = true;
+            try { _vm.ImagePath = _lastValidImagePath; }
+            finally { _applyingPath = false; }
+        }
     }
 
     /// <summary>Loads a custom icon from a file. .ico files load directly; other image formats go via Bitmap.GetHicon and are cleaned up after cloning.</summary>
@@ -270,8 +291,8 @@ public class MainForm : Form
         previous?.Dispose();
     }
 
-    /// <summary>Shrinks or grows the form's client area to match the loaded image's preferred size.</summary>
-    void DoAutoSize()
+    /// <summary>Shrinks or grows the form's client area to match the loaded image's preferred size. Public so SettingsForm's Autosize button can call it directly.</summary>
+    public void DoAutoSize()
     {
         ClientSize = _pictureBox.PreferredSize;
     }
@@ -284,7 +305,7 @@ public class MainForm : Form
         switch (e.KeyCode)
         {
             case Keys.S:
-                if (!_settings.PrankNoSettingsHotkey) ToggleSettings();
+                if (!_vm.PrankNoSettingsHotkey) ToggleSettings();
                 break;
             case Keys.V:
                 PasteImage();
@@ -301,10 +322,10 @@ public class MainForm : Form
         switch (e.Button)
         {
             case MouseButtons.Left:
-                if (!string.IsNullOrEmpty(_settings.PrankCommand)) RunPrankCommand(_settings.PrankCommand);
+                if (!string.IsNullOrEmpty(_vm.PrankCommand)) RunPrankCommand(_vm.PrankCommand);
                 break;
             case MouseButtons.Right:
-                if (!_settings.PrankNoSettingsRightClick) ToggleSettings();
+                if (!_vm.PrankNoSettingsRightClick) ToggleSettings();
                 break;
         }
     }
@@ -332,26 +353,12 @@ public class MainForm : Form
             : DragDropEffects.None;
     }
 
-    /// <summary>Loads the first dropped file as the frame image and remembers its path in the settings.</summary>
+    /// <summary>Sets the dropped image path on the VM; the dispatcher loads the image and bindings update SettingsForm's textbox.</summary>
     protected override void OnDragDrop(DragEventArgs drgevent)
     {
         base.OnDragDrop(drgevent);
         if (drgevent.Data?.GetData(DataFormats.FileDrop, false) is not string[] files || files.Length == 0) return;
-
-        try
-        {
-            LoadImage(files[0]);
-            _settings = _settings with { ImagePath = files[0] };
-            _settingsForm?.Refresh(_settings);
-        }
-        catch (FileNotFoundException)
-        {
-            ShowError(string.Format(Strings.ImageNotFoundErrorFormat, files[0]));
-        }
-        catch (OutOfMemoryException)
-        {
-            ShowError(string.Format(Strings.ImageLoadErrorFormat, files[0]));
-        }
+        _vm.ImagePath = files[0];
     }
 
     /// <summary>Pastes a clipboard image (or the first file in a clipboard file-drop list) as the frame image.</summary>
@@ -361,41 +368,20 @@ public class MainForm : Form
         {
             var image = Clipboard.GetImage();
             if (image is null) return;
-            SetImage(image);
-            _settings = _settings with { ImagePath = Strings.PastedImage };
-            _settingsForm?.Refresh(_settings);
+            SetImage(image);                     // place the image directly...
+            _vm.ImagePath = Strings.PastedImage; // ...then flip the path sentinel; dispatcher sees the sentinel and skips reload.
             return;
         }
 
         if (!Clipboard.ContainsFileDropList()) return;
         var imageFile = Clipboard.GetFileDropList()[0];
         if (imageFile is null) return;
-
-        try
-        {
-            LoadImage(imageFile);
-            _settings = _settings with { ImagePath = imageFile };
-            _settingsForm?.Refresh(_settings);
-        }
-        catch (FileNotFoundException)
-        {
-            ShowError(string.Format(Strings.ImageNotFoundErrorFormat, imageFile));
-        }
-        catch (OutOfMemoryException)
-        {
-            ShowError(string.Format(Strings.ImageLoadErrorFormat, imageFile));
-        }
+        _vm.ImagePath = imageFile;  // dispatcher will load.
     }
 
-    /// <summary>Shows or hides the SettingsForm; creates it on first call. The dialog is modeless and owned by this form.</summary>
+    /// <summary>Shows or hides the SettingsForm. The dialog is modeless and owned by this form.</summary>
     void ToggleSettings()
     {
-        if (_settingsForm is null)
-        {
-            _settingsForm = new SettingsForm(_settings, OnSettingsChanged);
-            _settingsForm.AutoSizeRequested += (_, _) => DoAutoSize();
-        }
-
         if (_settingsForm.Visible)
             _settingsForm.Hide();
         else

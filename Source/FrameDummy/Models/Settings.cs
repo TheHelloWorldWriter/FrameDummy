@@ -4,85 +4,133 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace FrameDummy;
 
 /// <summary>
-/// Persisted user settings for FrameDummy. Loaded once at startup and saved once at shutdown via SettingsStore.
-/// Properties are init-only; replace the record (with-expression or new instance) to apply changes.
+/// User settings for FrameDummy: the single source of truth for runtime state and the JSON model on disk.
+/// Both forms observe the same instance; the source generator emits INotifyPropertyChanged plumbing for each
+/// [ObservableProperty] field, so changes propagate to bound controls automatically. The setter guard inside
+/// each generated property means observers fire only on real changes - which is what makes data-binding immune
+/// to the focus-stealing problem that occurs when imperative code unconditionally re-sets style-affecting
+/// Form properties.
 /// </summary>
-public sealed record Settings
+public sealed partial class Settings : ObservableObject
 {
     // Frame tab.
 
     /// <summary>Frame title shown in the title bar of the fake window.</summary>
-    public string Title { get; init; } = "FrameDummy - Press Ctrl+S for settings";
+    [ObservableProperty] string _title = "FrameDummy - Press Ctrl+S for settings";
 
-    /// <summary>Path to a custom icon file (.ico or image), or null for the default application icon.</summary>
-    public string? IconPath { get; init; }
+    /// <summary>Path to a custom icon file (.ico or image), or empty for the default application icon.</summary>
+    [ObservableProperty] string _iconPath = string.Empty;
 
     /// <summary>Frame border style; controls whether the window has a border, sizable edges, etc.</summary>
-    public FormBorderStyle Border { get; init; } = FormBorderStyle.Sizable;
+    [ObservableProperty] FormBorderStyle _border = FormBorderStyle.Sizable;
 
-    /// <summary>Window opacity as a percentage from 1 (nearly invisible) to 100 (fully opaque).</summary>
-    public int Opacity { get; init; } = 100;
+    /// <summary>Window opacity as a percentage from 1 (nearly invisible) to 100 (fully opaque). Bind controls to this; bind Form.Opacity to OpacityFraction.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(OpacityFraction))]
+    [NotifyPropertyChangedFor(nameof(OpacityLabel))]
+    int _opacity = 100;
 
     /// <summary>Whether the frame shows the control box (the close / minimize / maximize button cluster).</summary>
-    public bool ControlBox { get; init; } = true;
+    [ObservableProperty] bool _controlBox = true;
 
     /// <summary>Whether the frame shows its icon in the title bar.</summary>
-    public bool ShowIcon { get; init; } = true;
+    [ObservableProperty] bool _showIcon = true;
 
     /// <summary>Whether the minimize button is enabled in the control box.</summary>
-    public bool MinimizeBox { get; init; } = true;
+    [ObservableProperty] bool _minimizeBox = true;
 
     /// <summary>Whether the maximize button is enabled in the control box.</summary>
-    public bool MaximizeBox { get; init; } = true;
+    [ObservableProperty] bool _maximizeBox = true;
 
     /// <summary>Whether the frame appears in the Windows taskbar.</summary>
-    public bool ShowInTaskbar { get; init; } = true;
+    [ObservableProperty] bool _showInTaskbar = true;
 
     /// <summary>Whether the frame stays above all other windows.</summary>
-    public bool TopMost { get; init; } = true;
+    [ObservableProperty] bool _topMost = true;
 
     // Content tab.
 
-    /// <summary>Path to the displayed image, or null when no image is shown.</summary>
-    public string? ImagePath { get; init; }
+    /// <summary>Path to the displayed image, the special PastedImage sentinel, or empty when no image is shown.</summary>
+    [ObservableProperty] string _imagePath = string.Empty;
 
     /// <summary>How the image is sized inside the frame (Normal, StretchImage, CenterImage, Zoom).</summary>
-    public PictureBoxSizeMode ImageSizing { get; init; } = PictureBoxSizeMode.Zoom;
+    [ObservableProperty] PictureBoxSizeMode _imageSizing = PictureBoxSizeMode.Zoom;
 
-    /// <summary>Background color in HTML form: a named color ("LightSlateGray") or "#RRGGBB". Decoded with ColorTranslator.</summary>
-    public string Color { get; init; } = "LightSlateGray";
+    /// <summary>Background color of the frame; bound directly to BackColor on MainForm and the swatch in SettingsForm.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EffectiveTransparencyKey))]
+    Color _color = Color.LightSlateGray;
 
-    /// <summary>Whether the background color is treated as transparent (becomes click-through).</summary>
-    public bool ColorTransparent { get; init; } = true;
+    /// <summary>Whether the background color is treated as transparent (becomes click-through). Combines with Color into EffectiveTransparencyKey.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EffectiveTransparencyKey))]
+    bool _colorTransparent = true;
 
     // Prank tab.
 
     /// <summary>Program path or URL to launch on left-click; empty string disables click-through behavior.</summary>
-    public string PrankCommand { get; init; } = string.Empty;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EffectiveCursor))]
+    string _prankCommand = string.Empty;
 
     /// <summary>Prank: hide the Settings form even when the user right-clicks the frame.</summary>
-    public bool PrankNoSettingsRightClick { get; init; }
+    [ObservableProperty] bool _prankNoSettingsRightClick;
 
     /// <summary>Prank: hide the Settings form even when the user presses Ctrl+S.</summary>
-    public bool PrankNoSettingsHotkey { get; init; }
+    [ObservableProperty] bool _prankNoSettingsHotkey;
 
     /// <summary>Prank: refuse to close the frame, making it appear stuck to the user.</summary>
-    public bool PrankNoClose { get; init; }
+    [ObservableProperty] bool _prankNoClose;
 
     // Window state.
 
     /// <summary>Saved window position and size; null means use the default centered location.</summary>
-    public WindowBounds? Bounds { get; init; }
+    [ObservableProperty] WindowBounds? _bounds;
 
     /// <summary>Whether the frame was maximized at last save.</summary>
-    public bool Maximized { get; init; }
+    [ObservableProperty] bool _maximized;
+
+    // Computed (derived) properties - read-only, [JsonIgnore] so they are not serialized.
+
+    /// <summary>Opacity as a 0.0-1.0 fraction for direct binding to Form.Opacity.</summary>
+    [JsonIgnore]
+    public double OpacityFraction => Opacity / 100.0;
+
+    /// <summary>Formatted opacity label for the slider caption ("Opacity:\n100%").</summary>
+    [JsonIgnore]
+    public string OpacityLabel => $"Opacity:\n{Opacity}%";
+
+    /// <summary>Color when transparency is on; Color.Empty otherwise. Bound to Form.TransparencyKey.</summary>
+    [JsonIgnore]
+    public Color EffectiveTransparencyKey => ColorTransparent ? Color : System.Drawing.Color.Empty;
+
+    /// <summary>Hand cursor when a prank command is set; default cursor otherwise. Bound to Form.Cursor.</summary>
+    [JsonIgnore]
+    public Cursor EffectiveCursor => string.IsNullOrEmpty(PrankCommand) ? Cursors.Default : Cursors.Hand;
 }
 
 /// <summary>Saved position and size of the main form. Maps to a Rectangle at the call site.</summary>
 public sealed record WindowBounds(int X, int Y, int Width, int Height);
+
+/// <summary>Json converter that serializes a System.Drawing.Color as the HTML form (named color or "#RRGGBB") and parses it back.</summary>
+public sealed class ColorJsonConverter : JsonConverter<Color>
+{
+    /// <summary>Reads an HTML color string; falls back to Black if the value is null or empty.</summary>
+    public override Color Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        var s = reader.GetString();
+        return string.IsNullOrEmpty(s) ? Color.Black : ColorTranslator.FromHtml(s);
+    }
+
+    /// <summary>Writes a Color as the HTML form: a named color when known, otherwise "#RRGGBB".</summary>
+    public override void Write(Utf8JsonWriter writer, Color value, JsonSerializerOptions options)
+        => writer.WriteStringValue(ColorTranslator.ToHtml(value));
+}
 
 /// <summary>
 /// Loads and saves Settings to a JSON file. The file path is portable-first
@@ -99,12 +147,16 @@ public static class SettingsStore
     /// <summary>Product-name component of the AppData fallback path.</summary>
     const string Product = "FrameDummy";
 
-    /// <summary>Cached JsonSerializer options: indented output, null-omitting, enums-as-strings.</summary>
+    /// <summary>Cached JsonSerializer options: indented output, null-omitting, enums-as-strings, Color via ColorJsonConverter.</summary>
     static readonly JsonSerializerOptions s_options = new()
     {
         WriteIndented = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        Converters = { new JsonStringEnumConverter() },
+        Converters =
+        {
+            new JsonStringEnumConverter(),
+            new ColorJsonConverter(),
+        },
     };
 
     /// <summary>Resolved settings file path. Computed once at startup; portable-first, AppData fallback.</summary>

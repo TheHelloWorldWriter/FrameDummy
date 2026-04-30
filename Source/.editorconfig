@@ -9,6 +9,9 @@ dotnet_diagnostic.IDE0073.severity = error
 # IDE0130: Namespace does not match folder structure - we use a flat `FrameDummy` namespace; folders organize the file tree only.
 dotnet_diagnostic.IDE0130.severity = none
 
+# MVVMTK0042: [ObservableProperty] can be converted to partial property - opting out for now; the field-with-attribute pattern is stable and the partial-property migration would touch every property without changing behavior.
+dotnet_diagnostic.MVVMTK0042.severity = none
+
 # Using directives
 csharp_using_directive_placement = outside_namespace:suggestion
 dotnet_sort_system_directives_first = true
