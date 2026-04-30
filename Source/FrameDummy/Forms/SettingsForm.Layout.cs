@@ -246,7 +246,7 @@ public partial class SettingsForm
         _iconTextBox.Text = Strings.DefaultIcon;
 
         // _iconBrowseButton
-        _iconBrowseButton.AutoSize = true;
+        _iconBrowseButton.AutoSize = false;
         _iconBrowseButton.Margin = new Padding(88, 0, 3, 12);
         _iconBrowseButton.Size = new Size(76, 27);
         _iconBrowseButton.Text = Strings.ButtonBrowse;
@@ -254,7 +254,7 @@ public partial class SettingsForm
         _iconBrowseButton.Click += OnIconBrowseClicked;
 
         // _iconDefaultButton
-        _iconDefaultButton.AutoSize = true;
+        _iconDefaultButton.AutoSize = false;
         _iconDefaultButton.Margin = new Padding(3, 0, 3, 12);
         _iconDefaultButton.Size = new Size(76, 27);
         _iconDefaultButton.Text = Strings.ButtonIconDefault;
@@ -369,7 +369,7 @@ public partial class SettingsForm
         _imageTextBox.Text = Strings.NoImage;
 
         // _imageBrowseButton
-        _imageBrowseButton.AutoSize = true;
+        _imageBrowseButton.AutoSize = false;
         _imageBrowseButton.Margin = new Padding(88, 0, 3, 12);
         _imageBrowseButton.Size = new Size(76, 27);
         _imageBrowseButton.Text = Strings.ButtonBrowse;
@@ -377,7 +377,7 @@ public partial class SettingsForm
         _imageBrowseButton.Click += OnImageBrowseClicked;
 
         // _imageClearButton
-        _imageClearButton.AutoSize = true;
+        _imageClearButton.AutoSize = false;
         _imageClearButton.Margin = new Padding(3, 0, 3, 12);
         _imageClearButton.Size = new Size(87, 27);
         _imageClearButton.Text = Strings.ButtonImageClear;
@@ -399,7 +399,7 @@ public partial class SettingsForm
         _imageSizingComboBox.SelectedIndexChanged += OnImageSizingChanged;
 
         // _autoSizeButton
-        _autoSizeButton.AutoSize = true;
+        _autoSizeButton.AutoSize = false;
         _autoSizeButton.Margin = new Padding(3, 0, 3, 0);
         _autoSizeButton.Size = new Size(87, 27);
         _autoSizeButton.Text = Strings.ButtonAutosize;
@@ -419,7 +419,7 @@ public partial class SettingsForm
         _colorValueLabel.BackColorChanged += OnColorValueChanged;
 
         // _colorBrowseButton
-        _colorBrowseButton.AutoSize = true;
+        _colorBrowseButton.AutoSize = false;
         _colorBrowseButton.Margin = new Padding(88, 0, 3, 0);
         _colorBrowseButton.Size = new Size(76, 27);
         _colorBrowseButton.Text = Strings.ButtonBrowse;
@@ -427,7 +427,7 @@ public partial class SettingsForm
         _colorBrowseButton.Click += OnColorBrowseClicked;
 
         // _colorRandomButton
-        _colorRandomButton.AutoSize = true;
+        _colorRandomButton.AutoSize = false;
         _colorRandomButton.Margin = new Padding(3, 0, 3, 0);
         _colorRandomButton.Size = new Size(87, 27);
         _colorRandomButton.Text = Strings.ButtonColorRandom;
