@@ -3,17 +3,15 @@
 
 namespace FrameDummy;
 
+/// <summary>Application entry point. Configures global WinForms defaults and runs the main form.</summary>
 static class Program
 {
-    /// <summary>
-    ///  The main entry point for the application.
-    /// </summary>
+    /// <summary>Main entry point. Initializes high-DPI mode, dark-mode follow-system, and runs the MainForm.</summary>
     [STAThread]
     static void Main()
     {
-        // To customize application configuration such as set high DPI settings or default font,
-        // see https://aka.ms/applicationconfiguration.
         ApplicationConfiguration.Initialize();
-        Application.Run(new Form1());
+        Application.SetColorMode(SystemColorMode.System);
+        Application.Run(new MainForm());
     }
 }
