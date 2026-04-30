@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2026 The Hello World Writer (https://www.thehelloworldwriter.com).
 // Licensed under the MIT License. See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -67,37 +66,19 @@ public static class SettingsStore
     /// <summary>Resolved settings file path. Computed once at startup; portable-first, AppData fallback.</summary>
     public static string FilePath { get; } = ResolvePath();
 
-    /// <summary>Loads settings from <see cref="FilePath"/>. Returns defaults if the file is missing or unreadable.</summary>
+    /// <summary>Loads settings from <see cref="FilePath"/>. Returns defaults if the file is missing; throws on I/O or JSON errors.</summary>
     public static Settings Load()
     {
         if (!File.Exists(FilePath)) return new Settings();
-
-        try
-        {
-            return JsonSerializer.Deserialize<Settings>(File.ReadAllText(FilePath), Options) ?? new Settings();
-        }
-        catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
-        {
-            // Suppress at the I/O boundary: a corrupt or unreadable settings file should not block startup.
-            Debug.WriteLine($"Settings load failed ({FilePath}): {ex.Message}");
-            return new Settings();
-        }
+        return JsonSerializer.Deserialize<Settings>(File.ReadAllText(FilePath), Options) ?? new Settings();
     }
 
-    /// <summary>Saves settings to <see cref="FilePath"/>, creating the AppData directory if needed. Errors are logged and suppressed.</summary>
+    /// <summary>Saves settings to <see cref="FilePath"/>, creating the AppData directory if needed. Throws on I/O errors.</summary>
     public static void Save(Settings settings)
     {
-        try
-        {
-            var dir = Path.GetDirectoryName(FilePath);
-            if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
-            File.WriteAllText(FilePath, JsonSerializer.Serialize(settings, Options));
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            // Suppress at the I/O boundary: a save failure on shutdown should not crash the app or block close.
-            Debug.WriteLine($"Settings save failed ({FilePath}): {ex.Message}");
-        }
+        var dir = Path.GetDirectoryName(FilePath);
+        if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+        File.WriteAllText(FilePath, JsonSerializer.Serialize(settings, Options));
     }
 
     static string ResolvePath()
