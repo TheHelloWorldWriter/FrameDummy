@@ -59,15 +59,10 @@ public partial class SettingsForm
     Label _aboutCopyrightLabel = null!;
     LinkLabel _aboutUrlLink = null!;
 
-    // Layout panels.
-    TableLayoutPanel _frameTLP = null!;
-    TableLayoutPanel _frameChecksTLP = null!;
-    FlowLayoutPanel _iconButtonsFLP = null!;
-    TableLayoutPanel _contentTLP = null!;
-    FlowLayoutPanel _imageButtonsFLP = null!;
-    TableLayoutPanel _sizingRowTLP = null!;
-    FlowLayoutPanel _colorButtonsFLP = null!;
-    TableLayoutPanel _prankTLP = null!;
+    // Layout panels (one FlowLayoutPanel per tab, matching v2's structure).
+    FlowLayoutPanel _frameFLP = null!;
+    FlowLayoutPanel _contentFLP = null!;
+    FlowLayoutPanel _prankFLP = null!;
     FlowLayoutPanel _aboutFLP = null!;
 
     /// <summary>Builds the entire layout. Three-phase Designer-style flow: instantiate everything, configure each control in its labeled section, then add the tab control to the form.</summary>
@@ -137,14 +132,9 @@ public partial class SettingsForm
         _aboutCopyrightLabel = new Label();
         _aboutUrlLink = new LinkLabel();
 
-        _frameTLP = new TableLayoutPanel();
-        _frameChecksTLP = new TableLayoutPanel();
-        _iconButtonsFLP = new FlowLayoutPanel();
-        _contentTLP = new TableLayoutPanel();
-        _imageButtonsFLP = new FlowLayoutPanel();
-        _sizingRowTLP = new TableLayoutPanel();
-        _colorButtonsFLP = new FlowLayoutPanel();
-        _prankTLP = new TableLayoutPanel();
+        _frameFLP = new FlowLayoutPanel();
+        _contentFLP = new FlowLayoutPanel();
+        _prankFLP = new FlowLayoutPanel();
         _aboutFLP = new FlowLayoutPanel();
     }
 
@@ -156,15 +146,13 @@ public partial class SettingsForm
         AutoScaleDimensions = new SizeF(8F, 16F);
         AutoScaleMode = AutoScaleMode.Font;
         AutoSize = true;
-        AutoSizeMode = AutoSizeMode.GrowOnly;
         BackColor = Color.Gainsboro;
-        ClientSize = new Size(640, 460);
+        ClientSize = new Size(623, 371);
         Font = SystemFonts.MessageBoxFont!;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         KeyPreview = true;
         MaximizeBox = false;
         MinimizeBox = false;
-        MinimumSize = new Size(640, 480);
         Name = nameof(SettingsForm);
         Padding = new Padding(20);
         ShowInTaskbar = false;
@@ -184,6 +172,7 @@ public partial class SettingsForm
         _tabControl.TabPages.Add(_aboutTabPage);
 
         // _frameTabPage
+        _frameTabPage.BackColor = Color.Transparent;
         _frameTabPage.Padding = new Padding(3);
         _frameTabPage.Text = Strings.TabFrame;
         _frameTabPage.UseVisualStyleBackColor = true;
@@ -204,376 +193,320 @@ public partial class SettingsForm
         _aboutTabPage.UseVisualStyleBackColor = true;
     }
 
-    /// <summary>Window Frame tab: title, icon, border, opacity, six frame-toggle checkboxes.</summary>
+    /// <summary>Window Frame tab: title, icon, border, opacity, six frame-toggle checkboxes (FlowLayoutPanel layout, ported from v2).</summary>
     void ConfigureFrameTab()
     {
-        // _frameTLP (outer 2-column grid for the tab)
-        _frameTLP.ColumnCount = 2;
-        _frameTLP.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        _frameTLP.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        _frameTLP.Dock = DockStyle.Fill;
-        _frameTLP.Padding = new Padding(20, 20, 20, 15);
-        _frameTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _frameTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _frameTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _frameTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _frameTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _frameTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _frameTLP.Controls.Add(_titleLabel, 0, 0);
-        _frameTLP.Controls.Add(_titleTextBox, 1, 0);
-        _frameTLP.Controls.Add(_iconLabel, 0, 1);
-        _frameTLP.Controls.Add(_iconTextBox, 1, 1);
-        _frameTLP.Controls.Add(_iconButtonsFLP, 1, 2);
-        _frameTLP.Controls.Add(_borderLabel, 0, 3);
-        _frameTLP.Controls.Add(_borderComboBox, 1, 3);
-        _frameTLP.Controls.Add(_opacityLabel, 0, 4);
-        _frameTLP.Controls.Add(_opacityTrackBar, 1, 4);
-        _frameTLP.Controls.Add(_frameChecksTLP, 0, 5);
-        _frameTLP.SetColumnSpan(_frameChecksTLP, 2);
-
-        // _frameChecksTLP (nested 3x2 grid for the 6 frame-toggle checkboxes)
-        _frameChecksTLP.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-        _frameChecksTLP.AutoSize = true;
-        _frameChecksTLP.ColumnCount = 3;
-        _frameChecksTLP.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
-        _frameChecksTLP.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
-        _frameChecksTLP.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.34F));
-        _frameChecksTLP.Margin = new Padding(0, 12, 0, 0);
-        _frameChecksTLP.RowCount = 2;
-        _frameChecksTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _frameChecksTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _frameChecksTLP.Controls.Add(_controlBoxCheck, 0, 0);
-        _frameChecksTLP.Controls.Add(_showIconCheck, 1, 0);
-        _frameChecksTLP.Controls.Add(_minimizeBoxCheck, 2, 0);
-        _frameChecksTLP.Controls.Add(_maximizeBoxCheck, 0, 1);
-        _frameChecksTLP.Controls.Add(_showInTaskbarCheck, 1, 1);
-        _frameChecksTLP.Controls.Add(_topmostCheck, 2, 1);
-
-        // _iconButtonsFLP (icon Browse + Default row)
-        _iconButtonsFLP.Anchor = AnchorStyles.Left;
-        _iconButtonsFLP.AutoSize = true;
-        _iconButtonsFLP.FlowDirection = FlowDirection.LeftToRight;
-        _iconButtonsFLP.Margin = new Padding(0, 0, 0, 12);
-        _iconButtonsFLP.Controls.Add(_iconBrowseButton);
-        _iconButtonsFLP.Controls.Add(_iconDefaultButton);
+        // _frameFLP (FlowLayoutPanel hosting all frame-tab controls)
+        _frameFLP.BackColor = Color.FromArgb(240, 240, 240);
+        _frameFLP.Dock = DockStyle.Fill;
+        _frameFLP.Padding = new Padding(20, 20, 20, 15);
+        _frameFLP.Controls.Add(_titleLabel);
+        _frameFLP.Controls.Add(_titleTextBox);
+        _frameFLP.Controls.Add(_iconLabel);
+        _frameFLP.Controls.Add(_iconTextBox);
+        _frameFLP.Controls.Add(_iconBrowseButton);
+        _frameFLP.Controls.Add(_iconDefaultButton);
+        _frameFLP.Controls.Add(_borderLabel);
+        _frameFLP.Controls.Add(_borderComboBox);
+        _frameFLP.Controls.Add(_opacityLabel);
+        _frameFLP.Controls.Add(_opacityTrackBar);
+        _frameFLP.Controls.Add(_controlBoxCheck);
+        _frameFLP.Controls.Add(_showIconCheck);
+        _frameFLP.Controls.Add(_minimizeBoxCheck);
+        _frameFLP.Controls.Add(_maximizeBoxCheck);
+        _frameFLP.Controls.Add(_showInTaskbarCheck);
+        _frameFLP.Controls.Add(_topmostCheck);
+        _frameFLP.SetFlowBreak(_titleTextBox, true);
+        _frameFLP.SetFlowBreak(_iconTextBox, true);
+        _frameFLP.SetFlowBreak(_iconDefaultButton, true);
+        _frameFLP.SetFlowBreak(_borderComboBox, true);
+        _frameFLP.SetFlowBreak(_opacityTrackBar, true);
+        _frameFLP.SetFlowBreak(_topmostCheck, true);
 
         // _titleLabel
-        _titleLabel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
         _titleLabel.AutoSize = true;
-        _titleLabel.Margin = new Padding(3);
         _titleLabel.MinimumSize = new Size(80, 0);
         _titleLabel.Text = Strings.LabelTitle;
 
         // _titleTextBox
-        _titleTextBox.Dock = DockStyle.Fill;
-        _titleTextBox.Margin = new Padding(3, 3, 3, 12);
+        _titleTextBox.Margin = new Padding(3, 0, 0, 12);
+        _titleTextBox.Size = new Size(430, 22);
         _titleTextBox.TextChanged += OnTitleChanged;
 
         // _iconLabel
-        _iconLabel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
         _iconLabel.AutoSize = true;
-        _iconLabel.Margin = new Padding(3);
         _iconLabel.MinimumSize = new Size(80, 0);
         _iconLabel.Text = Strings.LabelIcon;
 
         // _iconTextBox
-        _iconTextBox.Dock = DockStyle.Fill;
-        _iconTextBox.Margin = new Padding(3, 3, 3, 4);
+        _iconTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+        _iconTextBox.Margin = new Padding(3, 0, 3, 4);
         _iconTextBox.ReadOnly = true;
+        _iconTextBox.Size = new Size(430, 22);
         _iconTextBox.Text = Strings.DefaultIcon;
 
         // _iconBrowseButton
         _iconBrowseButton.AutoSize = true;
-        _iconBrowseButton.Margin = new Padding(3);
+        _iconBrowseButton.Margin = new Padding(88, 0, 3, 12);
+        _iconBrowseButton.Size = new Size(76, 27);
         _iconBrowseButton.Text = Strings.ButtonBrowse;
+        _iconBrowseButton.UseVisualStyleBackColor = true;
         _iconBrowseButton.Click += OnIconBrowseClicked;
 
         // _iconDefaultButton
         _iconDefaultButton.AutoSize = true;
-        _iconDefaultButton.Margin = new Padding(3);
+        _iconDefaultButton.Margin = new Padding(3, 0, 3, 12);
+        _iconDefaultButton.Size = new Size(76, 27);
         _iconDefaultButton.Text = Strings.ButtonIconDefault;
+        _iconDefaultButton.UseVisualStyleBackColor = true;
         _iconDefaultButton.Click += OnIconDefaultClicked;
 
         // _borderLabel
-        _borderLabel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
         _borderLabel.AutoSize = true;
-        _borderLabel.Margin = new Padding(3);
         _borderLabel.MinimumSize = new Size(80, 0);
         _borderLabel.Text = Strings.LabelBorder;
 
         // _borderComboBox
-        _borderComboBox.Dock = DockStyle.Fill;
         _borderComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-        _borderComboBox.Margin = new Padding(3, 3, 3, 20);
+        _borderComboBox.FormattingEnabled = true;
+        _borderComboBox.Margin = new Padding(3, 0, 0, 20);
+        _borderComboBox.Size = new Size(430, 24);
         foreach (FormBorderStyle style in Enum.GetValues<FormBorderStyle>()) _borderComboBox.Items.Add(style);
         _borderComboBox.SelectedIndexChanged += OnBorderChanged;
 
         // _opacityLabel
-        _opacityLabel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
         _opacityLabel.AutoSize = true;
-        _opacityLabel.Margin = new Padding(3);
+        _opacityLabel.MinimumSize = new Size(75, 0);
         _opacityLabel.Text = string.Format(Strings.LabelOpacityFormat, 1.0);
 
         // _opacityTrackBar
-        _opacityTrackBar.Dock = DockStyle.Fill;
-        _opacityTrackBar.Margin = new Padding(3, 3, 3, 12);
+        _opacityTrackBar.Margin = new Padding(0, 0, 0, 12);
         _opacityTrackBar.Maximum = 100;
         _opacityTrackBar.Minimum = 1;
+        _opacityTrackBar.Size = new Size(438, 56);
         _opacityTrackBar.TickFrequency = 2;
         _opacityTrackBar.Value = 100;
         _opacityTrackBar.ValueChanged += OnOpacityChanged;
 
         // _controlBoxCheck
-        _controlBoxCheck.Anchor = AnchorStyles.Left;
         _controlBoxCheck.AutoSize = true;
-        _controlBoxCheck.Margin = new Padding(3);
+        _controlBoxCheck.MinimumSize = new Size(160, 0);
         _controlBoxCheck.Text = Strings.CheckControlBox;
+        _controlBoxCheck.UseVisualStyleBackColor = true;
         _controlBoxCheck.CheckedChanged += OnControlBoxChanged;
 
         // _showIconCheck
-        _showIconCheck.Anchor = AnchorStyles.Left;
         _showIconCheck.AutoSize = true;
-        _showIconCheck.Margin = new Padding(3);
+        _showIconCheck.MinimumSize = new Size(160, 0);
         _showIconCheck.Text = Strings.CheckShowIcon;
+        _showIconCheck.UseVisualStyleBackColor = true;
         _showIconCheck.CheckedChanged += OnShowIconChanged;
 
         // _minimizeBoxCheck
-        _minimizeBoxCheck.Anchor = AnchorStyles.Left;
         _minimizeBoxCheck.AutoSize = true;
-        _minimizeBoxCheck.Margin = new Padding(3);
+        _minimizeBoxCheck.MinimumSize = new Size(160, 0);
         _minimizeBoxCheck.Text = Strings.CheckMinimizeBox;
+        _minimizeBoxCheck.UseVisualStyleBackColor = true;
         _minimizeBoxCheck.CheckedChanged += OnMinimizeBoxChanged;
 
         // _maximizeBoxCheck
-        _maximizeBoxCheck.Anchor = AnchorStyles.Left;
         _maximizeBoxCheck.AutoSize = true;
-        _maximizeBoxCheck.Margin = new Padding(3);
+        _maximizeBoxCheck.MinimumSize = new Size(160, 0);
         _maximizeBoxCheck.Text = Strings.CheckMaximizeBox;
+        _maximizeBoxCheck.UseVisualStyleBackColor = true;
         _maximizeBoxCheck.CheckedChanged += OnMaximizeBoxChanged;
 
         // _showInTaskbarCheck
-        _showInTaskbarCheck.Anchor = AnchorStyles.Left;
         _showInTaskbarCheck.AutoSize = true;
-        _showInTaskbarCheck.Margin = new Padding(3);
+        _showInTaskbarCheck.MinimumSize = new Size(160, 0);
         _showInTaskbarCheck.Text = Strings.CheckShowInTaskbar;
+        _showInTaskbarCheck.UseVisualStyleBackColor = true;
         _showInTaskbarCheck.CheckedChanged += OnShowInTaskbarChanged;
 
         // _topmostCheck
-        _topmostCheck.Anchor = AnchorStyles.Left;
         _topmostCheck.AutoSize = true;
-        _topmostCheck.Margin = new Padding(3);
+        _topmostCheck.MinimumSize = new Size(160, 0);
         _topmostCheck.Text = Strings.CheckTopmost;
+        _topmostCheck.UseVisualStyleBackColor = true;
         _topmostCheck.CheckedChanged += OnTopmostChanged;
 
-        _frameTabPage.Controls.Add(_frameTLP);
+        _frameTabPage.Controls.Add(_frameFLP);
     }
 
-    /// <summary>Window Content tab: image, sizing, color.</summary>
+    /// <summary>Window Content tab: image, sizing, color (FlowLayoutPanel layout, ported from v2).</summary>
     void ConfigureContentTab()
     {
-        // _contentTLP (outer 2-column grid for the tab)
-        _contentTLP.ColumnCount = 2;
-        _contentTLP.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        _contentTLP.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        _contentTLP.Dock = DockStyle.Fill;
-        _contentTLP.Padding = new Padding(20, 20, 20, 15);
-        _contentTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _contentTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _contentTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _contentTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _contentTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _contentTLP.Controls.Add(_imageLabel, 0, 0);
-        _contentTLP.Controls.Add(_imageTextBox, 1, 0);
-        _contentTLP.Controls.Add(_imageButtonsFLP, 1, 1);
-        _contentTLP.Controls.Add(_sizingLabel, 0, 2);
-        _contentTLP.Controls.Add(_sizingRowTLP, 1, 2);
-        _contentTLP.Controls.Add(_colorLabel, 0, 3);
-        _contentTLP.Controls.Add(_colorValueLabel, 1, 3);
-        _contentTLP.Controls.Add(_colorButtonsFLP, 1, 4);
-
-        // _imageButtonsFLP (image Browse + Clear row)
-        _imageButtonsFLP.Anchor = AnchorStyles.Left;
-        _imageButtonsFLP.AutoSize = true;
-        _imageButtonsFLP.FlowDirection = FlowDirection.LeftToRight;
-        _imageButtonsFLP.Margin = new Padding(0, 0, 0, 12);
-        _imageButtonsFLP.Controls.Add(_imageBrowseButton);
-        _imageButtonsFLP.Controls.Add(_imageClearButton);
-
-        // _sizingRowTLP (sizing combobox stretches; autosize button hugs the right)
-        _sizingRowTLP.AutoSize = true;
-        _sizingRowTLP.ColumnCount = 2;
-        _sizingRowTLP.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        _sizingRowTLP.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        _sizingRowTLP.Dock = DockStyle.Fill;
-        _sizingRowTLP.Margin = new Padding(0, 0, 0, 15);
-        _sizingRowTLP.RowCount = 1;
-        _sizingRowTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _sizingRowTLP.Controls.Add(_imageSizingComboBox, 0, 0);
-        _sizingRowTLP.Controls.Add(_autoSizeButton, 1, 0);
-
-        // _colorButtonsFLP (color Browse + Random + transparent row)
-        _colorButtonsFLP.Anchor = AnchorStyles.Left;
-        _colorButtonsFLP.AutoSize = true;
-        _colorButtonsFLP.FlowDirection = FlowDirection.LeftToRight;
-        _colorButtonsFLP.Margin = new Padding(0);
-        _colorButtonsFLP.Controls.Add(_colorBrowseButton);
-        _colorButtonsFLP.Controls.Add(_colorRandomButton);
-        _colorButtonsFLP.Controls.Add(_colorTransparentCheck);
+        // _contentFLP (FlowLayoutPanel hosting all content-tab controls)
+        _contentFLP.BackColor = Color.FromArgb(240, 240, 240);
+        _contentFLP.Dock = DockStyle.Fill;
+        _contentFLP.Padding = new Padding(20);
+        _contentFLP.Controls.Add(_imageLabel);
+        _contentFLP.Controls.Add(_imageTextBox);
+        _contentFLP.Controls.Add(_imageBrowseButton);
+        _contentFLP.Controls.Add(_imageClearButton);
+        _contentFLP.Controls.Add(_sizingLabel);
+        _contentFLP.Controls.Add(_imageSizingComboBox);
+        _contentFLP.Controls.Add(_autoSizeButton);
+        _contentFLP.Controls.Add(_colorLabel);
+        _contentFLP.Controls.Add(_colorValueLabel);
+        _contentFLP.Controls.Add(_colorBrowseButton);
+        _contentFLP.Controls.Add(_colorRandomButton);
+        _contentFLP.Controls.Add(_colorTransparentCheck);
+        _contentFLP.SetFlowBreak(_imageTextBox, true);
+        _contentFLP.SetFlowBreak(_imageClearButton, true);
+        _contentFLP.SetFlowBreak(_autoSizeButton, true);
+        _contentFLP.SetFlowBreak(_colorValueLabel, true);
 
         // _imageLabel
-        _imageLabel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
         _imageLabel.AutoSize = true;
-        _imageLabel.Margin = new Padding(3);
         _imageLabel.MinimumSize = new Size(80, 0);
         _imageLabel.Text = Strings.LabelImage;
 
         // _imageTextBox
-        _imageTextBox.Dock = DockStyle.Fill;
-        _imageTextBox.Margin = new Padding(3, 3, 3, 4);
+        _imageTextBox.Margin = new Padding(3, 0, 3, 4);
         _imageTextBox.ReadOnly = true;
+        _imageTextBox.Size = new Size(429, 22);
         _imageTextBox.Text = Strings.NoImage;
 
         // _imageBrowseButton
         _imageBrowseButton.AutoSize = true;
-        _imageBrowseButton.Margin = new Padding(3);
+        _imageBrowseButton.Margin = new Padding(88, 0, 3, 12);
+        _imageBrowseButton.Size = new Size(76, 27);
         _imageBrowseButton.Text = Strings.ButtonBrowse;
+        _imageBrowseButton.UseVisualStyleBackColor = true;
         _imageBrowseButton.Click += OnImageBrowseClicked;
 
         // _imageClearButton
         _imageClearButton.AutoSize = true;
-        _imageClearButton.Margin = new Padding(3);
+        _imageClearButton.Margin = new Padding(3, 0, 3, 12);
+        _imageClearButton.Size = new Size(87, 27);
         _imageClearButton.Text = Strings.ButtonImageClear;
+        _imageClearButton.UseVisualStyleBackColor = true;
         _imageClearButton.Click += OnImageClearClicked;
 
         // _sizingLabel
-        _sizingLabel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
         _sizingLabel.AutoSize = true;
-        _sizingLabel.Margin = new Padding(3);
         _sizingLabel.MinimumSize = new Size(80, 0);
         _sizingLabel.Text = Strings.LabelSizing;
 
         // _imageSizingComboBox
-        _imageSizingComboBox.Dock = DockStyle.Fill;
         _imageSizingComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-        _imageSizingComboBox.Margin = new Padding(3);
+        _imageSizingComboBox.FormattingEnabled = true;
+        _imageSizingComboBox.Margin = new Padding(3, 2, 3, 15);
+        _imageSizingComboBox.Size = new Size(336, 24);
         foreach (PictureBoxSizeMode mode in Enum.GetValues<PictureBoxSizeMode>())
             if (mode != PictureBoxSizeMode.AutoSize) _imageSizingComboBox.Items.Add(mode);
         _imageSizingComboBox.SelectedIndexChanged += OnImageSizingChanged;
 
         // _autoSizeButton
         _autoSizeButton.AutoSize = true;
-        _autoSizeButton.Margin = new Padding(3);
+        _autoSizeButton.Margin = new Padding(3, 0, 3, 0);
+        _autoSizeButton.Size = new Size(87, 27);
         _autoSizeButton.Text = Strings.ButtonAutosize;
+        _autoSizeButton.UseVisualStyleBackColor = true;
         _autoSizeButton.Click += OnAutoSizeClicked;
 
         // _colorLabel
-        _colorLabel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
         _colorLabel.AutoSize = true;
-        _colorLabel.Margin = new Padding(3);
         _colorLabel.MinimumSize = new Size(80, 0);
         _colorLabel.Text = Strings.LabelColor;
 
         // _colorValueLabel (color preview swatch)
-        _colorValueLabel.AutoSize = false;
+        _colorValueLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
         _colorValueLabel.BackColor = Color.LightSlateGray;
-        _colorValueLabel.BorderStyle = BorderStyle.FixedSingle;
-        _colorValueLabel.Dock = DockStyle.Fill;
-        _colorValueLabel.Height = 24;
-        _colorValueLabel.Margin = new Padding(3, 3, 3, 4);
+        _colorValueLabel.Margin = new Padding(3, 0, 3, 4);
+        _colorValueLabel.Size = new Size(429, 22);
         _colorValueLabel.BackColorChanged += OnColorValueChanged;
 
         // _colorBrowseButton
         _colorBrowseButton.AutoSize = true;
-        _colorBrowseButton.Margin = new Padding(3);
+        _colorBrowseButton.Margin = new Padding(88, 0, 3, 0);
+        _colorBrowseButton.Size = new Size(76, 27);
         _colorBrowseButton.Text = Strings.ButtonBrowse;
+        _colorBrowseButton.UseVisualStyleBackColor = true;
         _colorBrowseButton.Click += OnColorBrowseClicked;
 
         // _colorRandomButton
         _colorRandomButton.AutoSize = true;
-        _colorRandomButton.Margin = new Padding(3);
+        _colorRandomButton.Margin = new Padding(3, 0, 3, 0);
+        _colorRandomButton.Size = new Size(87, 27);
         _colorRandomButton.Text = Strings.ButtonColorRandom;
+        _colorRandomButton.UseVisualStyleBackColor = true;
         _colorRandomButton.Click += OnColorRandomClicked;
 
         // _colorTransparentCheck
-        _colorTransparentCheck.Anchor = AnchorStyles.Left;
         _colorTransparentCheck.AutoSize = true;
-        _colorTransparentCheck.Margin = new Padding(12, 6, 3, 3);
+        _colorTransparentCheck.Margin = new Padding(6, 4, 3, 0);
         _colorTransparentCheck.Text = Strings.CheckColorTransparent;
+        _colorTransparentCheck.UseVisualStyleBackColor = true;
         _colorTransparentCheck.CheckedChanged += OnColorTransparentChanged;
 
-        _contentTabPage.Controls.Add(_contentTLP);
+        _contentTabPage.Controls.Add(_contentFLP);
     }
 
-    /// <summary>Prank Mode tab: command, intro label, three prank checkboxes.</summary>
+    /// <summary>Prank Mode tab: command, intro label, three prank checkboxes (FlowLayoutPanel layout, ported from v2).</summary>
     void ConfigurePrankTab()
     {
-        // _prankTLP (single-column stack for the tab)
-        _prankTLP.ColumnCount = 1;
-        _prankTLP.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        _prankTLP.Dock = DockStyle.Fill;
-        _prankTLP.Padding = new Padding(20, 20, 20, 15);
-        _prankTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _prankTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _prankTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _prankTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _prankTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _prankTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        _prankTLP.Controls.Add(_commandLabel, 0, 0);
-        _prankTLP.Controls.Add(_commandTextBox, 0, 1);
-        _prankTLP.Controls.Add(_prankIntroLabel, 0, 2);
-        _prankTLP.Controls.Add(_prankNoRightClickCheck, 0, 3);
-        _prankTLP.Controls.Add(_prankNoHotkeyCheck, 0, 4);
-        _prankTLP.Controls.Add(_prankNoCloseCheck, 0, 5);
+        // _prankFLP (FlowLayoutPanel hosting all prank-tab controls)
+        _prankFLP.BackColor = Color.FromArgb(240, 240, 240);
+        _prankFLP.Dock = DockStyle.Fill;
+        _prankFLP.Padding = new Padding(20);
+        _prankFLP.Controls.Add(_commandLabel);
+        _prankFLP.Controls.Add(_commandTextBox);
+        _prankFLP.Controls.Add(_prankIntroLabel);
+        _prankFLP.Controls.Add(_prankNoRightClickCheck);
+        _prankFLP.Controls.Add(_prankNoHotkeyCheck);
+        _prankFLP.Controls.Add(_prankNoCloseCheck);
+        _prankFLP.SetFlowBreak(_commandLabel, true);
+        _prankFLP.SetFlowBreak(_commandTextBox, true);
+        _prankFLP.SetFlowBreak(_prankIntroLabel, true);
+        _prankFLP.SetFlowBreak(_prankNoRightClickCheck, true);
+        _prankFLP.SetFlowBreak(_prankNoHotkeyCheck, true);
 
         // _commandLabel
-        _commandLabel.Anchor = AnchorStyles.Left;
         _commandLabel.AutoSize = true;
-        _commandLabel.Margin = new Padding(3, 3, 3, 0);
+        _commandLabel.Margin = new Padding(0);
         _commandLabel.Text = Strings.LabelPrankCommand;
 
         // _commandTextBox
-        _commandTextBox.Dock = DockStyle.Fill;
-        _commandTextBox.Margin = new Padding(3, 3, 3, 12);
+        _commandTextBox.Margin = new Padding(3, 3, 0, 15);
+        _commandTextBox.Size = new Size(516, 22);
         _commandTextBox.TextChanged += OnCommandChanged;
 
         // _prankIntroLabel
-        _prankIntroLabel.Anchor = AnchorStyles.Left;
         _prankIntroLabel.AutoSize = true;
-        _prankIntroLabel.Margin = new Padding(3, 6, 3, 6);
+        _prankIntroLabel.Margin = new Padding(0, 0, 0, 15);
         _prankIntroLabel.Text = Strings.LabelPrankIntro;
 
         // _prankNoRightClickCheck
-        _prankNoRightClickCheck.Anchor = AnchorStyles.Left;
         _prankNoRightClickCheck.AutoSize = true;
-        _prankNoRightClickCheck.Margin = new Padding(3, 3, 3, 6);
         _prankNoRightClickCheck.Text = Strings.CheckPrankNoRightClick;
+        _prankNoRightClickCheck.UseVisualStyleBackColor = true;
         _prankNoRightClickCheck.CheckedChanged += OnPrankNoRightClickChanged;
 
         // _prankNoHotkeyCheck
-        _prankNoHotkeyCheck.Anchor = AnchorStyles.Left;
         _prankNoHotkeyCheck.AutoSize = true;
-        _prankNoHotkeyCheck.Margin = new Padding(3, 3, 3, 6);
         _prankNoHotkeyCheck.Text = Strings.CheckPrankNoHotkey;
+        _prankNoHotkeyCheck.UseVisualStyleBackColor = true;
         _prankNoHotkeyCheck.CheckedChanged += OnPrankNoHotkeyChanged;
 
         // _prankNoCloseCheck
-        _prankNoCloseCheck.Anchor = AnchorStyles.Left;
         _prankNoCloseCheck.AutoSize = true;
-        _prankNoCloseCheck.Margin = new Padding(3, 3, 3, 6);
         _prankNoCloseCheck.Text = Strings.CheckPrankNoClose;
+        _prankNoCloseCheck.UseVisualStyleBackColor = true;
         _prankNoCloseCheck.CheckedChanged += OnPrankNoCloseChanged;
 
-        _prankTabPage.Controls.Add(_prankTLP);
+        _prankTabPage.Controls.Add(_prankFLP);
     }
 
-    /// <summary>About tab: app name, version, copyright, URL link, vertically stacked.</summary>
+    /// <summary>About tab: app name, version, copyright, URL link, vertically stacked (FlowLayoutPanel TopDown, ported from v2).</summary>
     void ConfigureAboutTab()
     {
         // _aboutFLP (TopDown stack for the tab)
+        _aboutFLP.BackColor = Color.FromArgb(240, 240, 240);
         _aboutFLP.Dock = DockStyle.Fill;
         _aboutFLP.FlowDirection = FlowDirection.TopDown;
         _aboutFLP.Padding = new Padding(20);
-        _aboutFLP.WrapContents = false;
         _aboutFLP.Controls.Add(_aboutNameLabel);
         _aboutFLP.Controls.Add(_aboutVersionLabel);
         _aboutFLP.Controls.Add(_aboutCopyrightLabel);
@@ -581,21 +514,22 @@ public partial class SettingsForm
 
         // _aboutNameLabel
         _aboutNameLabel.AutoSize = true;
-        _aboutNameLabel.Font = new Font(Font.FontFamily, 12F, FontStyle.Bold);
-        _aboutNameLabel.Margin = new Padding(3, 3, 3, 12);
+        _aboutNameLabel.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold);
+        _aboutNameLabel.Margin = new Padding(3, 0, 3, 10);
         _aboutNameLabel.Text = Strings.AppName;
 
         // _aboutVersionLabel (text set in OnShown so we read the live ProductVersion)
         _aboutVersionLabel.AutoSize = true;
-        _aboutVersionLabel.Margin = new Padding(3);
+        _aboutVersionLabel.Margin = new Padding(3, 0, 3, 3);
 
         // _aboutCopyrightLabel (text set in OnShown so we read the live current year)
         _aboutCopyrightLabel.AutoSize = true;
-        _aboutCopyrightLabel.Margin = new Padding(3, 3, 3, 12);
+        _aboutCopyrightLabel.Margin = new Padding(3, 0, 3, 10);
 
         // _aboutUrlLink
         _aboutUrlLink.AutoSize = true;
         _aboutUrlLink.Margin = new Padding(3);
+        _aboutUrlLink.TabStop = true;
         _aboutUrlLink.Text = Strings.AboutUrl;
         _aboutUrlLink.LinkClicked += OnAboutUrlClicked;
 
