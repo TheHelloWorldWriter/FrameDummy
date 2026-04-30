@@ -56,7 +56,7 @@ public static class SettingsStore
     const string Company = "TheHelloWorldWriter";
     const string Product = "FrameDummy";
 
-    static readonly JsonSerializerOptions Options = new()
+    static readonly JsonSerializerOptions s_options = new()
     {
         WriteIndented = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
@@ -70,7 +70,7 @@ public static class SettingsStore
     public static Settings Load()
     {
         if (!File.Exists(FilePath)) return new Settings();
-        return JsonSerializer.Deserialize<Settings>(File.ReadAllText(FilePath), Options) ?? new Settings();
+        return JsonSerializer.Deserialize<Settings>(File.ReadAllText(FilePath), s_options) ?? new Settings();
     }
 
     /// <summary>Saves settings to <see cref="FilePath"/>, creating the AppData directory if needed. Throws on I/O errors.</summary>
@@ -78,7 +78,7 @@ public static class SettingsStore
     {
         var dir = Path.GetDirectoryName(FilePath);
         if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
-        File.WriteAllText(FilePath, JsonSerializer.Serialize(settings, Options));
+        File.WriteAllText(FilePath, JsonSerializer.Serialize(settings, s_options));
     }
 
     static string ResolvePath()
