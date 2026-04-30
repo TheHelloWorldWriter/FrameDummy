@@ -44,6 +44,7 @@ public class MainForm : Form
         AccessibleName = "FrameDummy";
         AccessibleDescription = "A fake desktop window frame for displaying images or screen areas.";
         AllowDrop = true;
+        AutoScaleDimensions = new SizeF(8F, 16F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.LightSlateGray;
         ClientSize = new Size(687, 451);

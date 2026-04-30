@@ -153,13 +153,18 @@ public partial class SettingsForm
     {
         // SettingsForm
         AccessibleName = Strings.SettingsTitle;
+        AutoScaleDimensions = new SizeF(8F, 16F);
+        AutoScaleMode = AutoScaleMode.Font;
+        AutoSize = true;
+        AutoSizeMode = AutoSizeMode.GrowOnly;
         BackColor = Color.Gainsboro;
-        ClientSize = new Size(620, 380);
+        ClientSize = new Size(640, 460);
         Font = SystemFonts.MessageBoxFont!;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         KeyPreview = true;
         MaximizeBox = false;
         MinimizeBox = false;
+        MinimumSize = new Size(640, 480);
         Name = nameof(SettingsForm);
         Padding = new Padding(20);
         ShowInTaskbar = false;
@@ -248,7 +253,7 @@ public partial class SettingsForm
         _iconButtonsFLP.Anchor = AnchorStyles.Left;
         _iconButtonsFLP.AutoSize = true;
         _iconButtonsFLP.FlowDirection = FlowDirection.LeftToRight;
-        _iconButtonsFLP.Margin = new Padding(0);
+        _iconButtonsFLP.Margin = new Padding(0, 0, 0, 12);
         _iconButtonsFLP.Controls.Add(_iconBrowseButton);
         _iconButtonsFLP.Controls.Add(_iconDefaultButton);
 
@@ -261,7 +266,7 @@ public partial class SettingsForm
 
         // _titleTextBox
         _titleTextBox.Dock = DockStyle.Fill;
-        _titleTextBox.Margin = new Padding(3);
+        _titleTextBox.Margin = new Padding(3, 3, 3, 12);
         _titleTextBox.TextChanged += OnTitleChanged;
 
         // _iconLabel
@@ -273,7 +278,7 @@ public partial class SettingsForm
 
         // _iconTextBox
         _iconTextBox.Dock = DockStyle.Fill;
-        _iconTextBox.Margin = new Padding(3);
+        _iconTextBox.Margin = new Padding(3, 3, 3, 4);
         _iconTextBox.ReadOnly = true;
         _iconTextBox.Text = Strings.DefaultIcon;
 
@@ -299,7 +304,7 @@ public partial class SettingsForm
         // _borderComboBox
         _borderComboBox.Dock = DockStyle.Fill;
         _borderComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-        _borderComboBox.Margin = new Padding(3);
+        _borderComboBox.Margin = new Padding(3, 3, 3, 20);
         foreach (FormBorderStyle style in Enum.GetValues<FormBorderStyle>()) _borderComboBox.Items.Add(style);
         _borderComboBox.SelectedIndexChanged += OnBorderChanged;
 
@@ -311,7 +316,7 @@ public partial class SettingsForm
 
         // _opacityTrackBar
         _opacityTrackBar.Dock = DockStyle.Fill;
-        _opacityTrackBar.Margin = new Padding(3);
+        _opacityTrackBar.Margin = new Padding(3, 3, 3, 12);
         _opacityTrackBar.Maximum = 100;
         _opacityTrackBar.Minimum = 1;
         _opacityTrackBar.TickFrequency = 2;
@@ -390,7 +395,7 @@ public partial class SettingsForm
         _imageButtonsFLP.Anchor = AnchorStyles.Left;
         _imageButtonsFLP.AutoSize = true;
         _imageButtonsFLP.FlowDirection = FlowDirection.LeftToRight;
-        _imageButtonsFLP.Margin = new Padding(0);
+        _imageButtonsFLP.Margin = new Padding(0, 0, 0, 12);
         _imageButtonsFLP.Controls.Add(_imageBrowseButton);
         _imageButtonsFLP.Controls.Add(_imageClearButton);
 
@@ -400,7 +405,7 @@ public partial class SettingsForm
         _sizingRowTLP.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         _sizingRowTLP.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         _sizingRowTLP.Dock = DockStyle.Fill;
-        _sizingRowTLP.Margin = new Padding(0);
+        _sizingRowTLP.Margin = new Padding(0, 0, 0, 15);
         _sizingRowTLP.RowCount = 1;
         _sizingRowTLP.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         _sizingRowTLP.Controls.Add(_imageSizingComboBox, 0, 0);
@@ -424,7 +429,7 @@ public partial class SettingsForm
 
         // _imageTextBox
         _imageTextBox.Dock = DockStyle.Fill;
-        _imageTextBox.Margin = new Padding(3);
+        _imageTextBox.Margin = new Padding(3, 3, 3, 4);
         _imageTextBox.ReadOnly = true;
         _imageTextBox.Text = Strings.NoImage;
 
@@ -474,7 +479,7 @@ public partial class SettingsForm
         _colorValueLabel.BorderStyle = BorderStyle.FixedSingle;
         _colorValueLabel.Dock = DockStyle.Fill;
         _colorValueLabel.Height = 24;
-        _colorValueLabel.Margin = new Padding(3);
+        _colorValueLabel.Margin = new Padding(3, 3, 3, 4);
         _colorValueLabel.BackColorChanged += OnColorValueChanged;
 
         // _colorBrowseButton
