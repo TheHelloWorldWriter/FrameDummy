@@ -6,6 +6,9 @@ max_line_length = 120
 file_header_template = Copyright (c) 2013-2026 The Hello World Writer (https://www.thehelloworldwriter.com).\nLicensed under the MIT License. See the LICENSE file in the project root for more information.
 dotnet_diagnostic.IDE0073.severity = error
 
+# IDE0130: Namespace does not match folder structure - we use a flat `FrameDummy` namespace; folders organize the file tree only.
+dotnet_diagnostic.IDE0130.severity = none
+
 # Using directives
 csharp_using_directive_placement = outside_namespace:suggestion
 dotnet_sort_system_directives_first = true
