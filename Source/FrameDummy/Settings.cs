@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 namespace FrameDummy;
 
 /// <summary>
-/// Persisted user settings for FrameDummy. Loaded once at startup and saved once at shutdown via <see cref="SettingsStore"/>.
+/// Persisted user settings for FrameDummy. Loaded once at startup and saved once at shutdown via SettingsStore.
 /// Properties are init-only; replace the record (with-expression or new instance) to apply changes.
 /// </summary>
 public sealed record Settings
@@ -52,7 +52,7 @@ public sealed record Settings
     /// <summary>How the image is sized inside the frame (Normal, StretchImage, CenterImage, Zoom).</summary>
     public PictureBoxSizeMode ImageSizing { get; init; } = PictureBoxSizeMode.Zoom;
 
-    /// <summary>Background color in HTML form: a named color ("LightSlateGray") or "#RRGGBB". Decoded with <see cref="System.Drawing.ColorTranslator"/>.</summary>
+    /// <summary>Background color in HTML form: a named color ("LightSlateGray") or "#RRGGBB". Decoded with ColorTranslator.</summary>
     public string Color { get; init; } = "LightSlateGray";
 
     /// <summary>Whether the background color is treated as transparent (becomes click-through).</summary>
@@ -81,20 +81,16 @@ public sealed record Settings
     public bool Maximized { get; init; }
 }
 
-/// <summary>Saved position and size of the main form. Maps to <see cref="System.Drawing.Rectangle"/> at the call site.</summary>
-/// <param name="X">X-coordinate of the upper-left corner.</param>
-/// <param name="Y">Y-coordinate of the upper-left corner.</param>
-/// <param name="Width">Width in pixels.</param>
-/// <param name="Height">Height in pixels.</param>
+/// <summary>Saved position and size of the main form. Maps to a Rectangle at the call site.</summary>
 public sealed record WindowBounds(int X, int Y, int Width, int Height);
 
 /// <summary>
-/// Loads and saves <see cref="Settings"/> to a JSON file. The file path is portable-first
+/// Loads and saves Settings to a JSON file. The file path is portable-first
 /// (next to the executable, when that file already exists) with an %AppData% fallback for installed scenarios.
 /// </summary>
 public static class SettingsStore
 {
-    /// <summary>Settings file name; combined with the resolved directory at <see cref="ResolvePath"/>.</summary>
+    /// <summary>Settings file name; combined with the resolved directory at ResolvePath.</summary>
     const string FileName = "framedummy.json";
 
     /// <summary>Company-name component of the AppData fallback path.</summary>
@@ -114,14 +110,14 @@ public static class SettingsStore
     /// <summary>Resolved settings file path. Computed once at startup; portable-first, AppData fallback.</summary>
     public static string FilePath { get; } = ResolvePath();
 
-    /// <summary>Loads settings from <see cref="FilePath"/>. Returns defaults if the file is missing; throws on I/O or JSON errors.</summary>
+    /// <summary>Loads settings from FilePath. Returns defaults if the file is missing; throws on I/O or JSON errors.</summary>
     public static Settings Load()
     {
         if (!File.Exists(FilePath)) return new Settings();
         return JsonSerializer.Deserialize<Settings>(File.ReadAllText(FilePath), s_options) ?? new Settings();
     }
 
-    /// <summary>Saves settings to <see cref="FilePath"/>, creating the AppData directory if needed. Throws on I/O errors.</summary>
+    /// <summary>Saves settings to FilePath, creating the AppData directory if needed. Throws on I/O errors.</summary>
     public static void Save(Settings settings)
     {
         var dir = Path.GetDirectoryName(FilePath);
