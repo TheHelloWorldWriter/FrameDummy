@@ -13,11 +13,11 @@ namespace FrameDummy;
 /// <summary>
 /// The main FrameDummy frame: a top-level window that looks and behaves like a real one and shows an image
 /// or solid color (with optional click-through transparency). Owns the persisted Settings record and applies
-/// it to the form on load; saves it on close.
+/// it to the form on load; saves it on close. Hosts the modeless SettingsForm for live editing.
 /// </summary>
 public class MainForm : Form
 {
-    /// <summary>The currently active settings. Replaced (with-expression) when the user changes a value.</summary>
+    /// <summary>The currently active settings. Replaced via with-expression on every change.</summary>
     Settings _settings = new();
 
     /// <summary>Default frame icon, extracted once from the .exe at construction. Restored when the user clears a custom icon.</summary>
@@ -28,6 +28,9 @@ public class MainForm : Form
 
     /// <summary>The single child PictureBox that fills the form and renders the image / background color.</summary>
     PictureBox _pictureBox = null!;
+
+    /// <summary>The settings dialog. Lazily created on first toggle; hidden (not closed) on user close.</summary>
+    SettingsForm? _settingsForm;
 
     /// <summary>Initializes the main form: builds layout, extracts the default icon from the .exe.</summary>
     public MainForm()
@@ -83,8 +86,8 @@ public class MainForm : Form
 
         try
         {
-            _settings = SettingsStore.Load();
-            ApplySettings();
+            var loaded = SettingsStore.Load();
+            _settings = Apply(_settings, loaded);
         }
         catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
         {
@@ -128,61 +131,98 @@ public class MainForm : Form
         }
     }
 
-    /// <summary>Disposes the icons we own (default and custom). The PictureBox image is owned by the box and gets disposed by the framework.</summary>
+    /// <summary>Disposes the icons and child SettingsForm we own. The PictureBox image is owned by the box and gets disposed by the framework.</summary>
     protected override void Dispose(bool disposing)
     {
         if (disposing)
         {
+            _settingsForm?.Dispose();
             _customIcon?.Dispose();
             _defaultIcon?.Dispose();
         }
         base.Dispose(disposing);
     }
 
-    /// <summary>Applies every property of the current Settings record to the form, PictureBox, and resources.</summary>
-    void ApplySettings()
+    /// <summary>
+    /// Applies a delta from prev to next: writes form properties unconditionally (cheap), reloads icon/image only if the path changed,
+    /// and reverts paths on load failure (returning the actually-applied Settings). The caller stores the return value as the new state.
+    /// </summary>
+    Settings Apply(Settings prev, Settings next)
     {
-        Text = _settings.Title;
-        FormBorderStyle = _settings.Border;
-        Opacity = _settings.Opacity / 100.0;
-        ControlBox = _settings.ControlBox;
-        ShowIcon = _settings.ShowIcon;
-        MinimizeBox = _settings.MinimizeBox;
-        MaximizeBox = _settings.MaximizeBox;
-        ShowInTaskbar = _settings.ShowInTaskbar;
-        TopMost = _settings.TopMost;
-        Cursor = string.IsNullOrEmpty(_settings.PrankCommand) ? Cursors.Default : Cursors.Hand;
-        _pictureBox.SizeMode = _settings.ImageSizing;
+        var result = next;
 
-        var color = ColorTranslator.FromHtml(_settings.Color);
+        Text = next.Title;
+        FormBorderStyle = next.Border;
+        Opacity = next.Opacity / 100.0;
+        ControlBox = next.ControlBox;
+        ShowIcon = next.ShowIcon;
+        MinimizeBox = next.MinimizeBox;
+        MaximizeBox = next.MaximizeBox;
+        ShowInTaskbar = next.ShowInTaskbar;
+        TopMost = next.TopMost;
+        Cursor = string.IsNullOrEmpty(next.PrankCommand) ? Cursors.Default : Cursors.Hand;
+        _pictureBox.SizeMode = next.ImageSizing;
+
+        var color = ColorTranslator.FromHtml(next.Color);
         BackColor = color;
         _pictureBox.BackColor = color;
-        TransparencyKey = _settings.ColorTransparent ? color : Color.Empty;
+        TransparencyKey = next.ColorTransparent ? color : Color.Empty;
 
-        if (!string.IsNullOrEmpty(_settings.IconPath))
+        if (prev.IconPath != next.IconPath)
         {
-            try { LoadIcon(_settings.IconPath); }
-            catch (Exception ex) when (ex is IOException or ArgumentException or FileNotFoundException)
+            if (string.IsNullOrEmpty(next.IconPath))
             {
-                ShowError(string.Format(Strings.IconLoadErrorFormat, _settings.IconPath));
+                _customIcon?.Dispose();
+                _customIcon = null;
+                if (_defaultIcon is not null) Icon = _defaultIcon;
+            }
+            else
+            {
+                try { LoadIcon(next.IconPath); }
+                catch (Exception ex) when (ex is IOException or ArgumentException or FileNotFoundException)
+                {
+                    ShowError(string.Format(Strings.IconLoadErrorFormat, next.IconPath));
+                    result = result with { IconPath = prev.IconPath };
+                }
             }
         }
 
-        if (!string.IsNullOrEmpty(_settings.ImagePath) && _settings.ImagePath != Strings.PastedImage)
+        if (prev.ImagePath != next.ImagePath)
         {
-            try { LoadImage(_settings.ImagePath); }
-            catch (FileNotFoundException)
+            if (string.IsNullOrEmpty(next.ImagePath))
             {
-                ShowError(string.Format(Strings.ImageNotFoundErrorFormat, _settings.ImagePath));
+                SetImage(null);
             }
-            catch (OutOfMemoryException)
+            else if (next.ImagePath != Strings.PastedImage)
             {
-                ShowError(string.Format(Strings.ImageLoadErrorFormat, _settings.ImagePath));
+                try { LoadImage(next.ImagePath); }
+                catch (FileNotFoundException)
+                {
+                    ShowError(string.Format(Strings.ImageNotFoundErrorFormat, next.ImagePath));
+                    result = result with { ImagePath = prev.ImagePath };
+                }
+                catch (OutOfMemoryException)
+                {
+                    ShowError(string.Format(Strings.ImageLoadErrorFormat, next.ImagePath));
+                    result = result with { ImagePath = prev.ImagePath };
+                }
             }
         }
 
-        if (_settings.Bounds is { } b) Bounds = new Rectangle(b.X, b.Y, b.Width, b.Height);
-        if (_settings.Maximized) WindowState = FormWindowState.Maximized;
+        // Bounds and Maximized only apply on initial load - the dialog never edits them.
+        if (prev.Bounds is null && next.Bounds is { } b) Bounds = new Rectangle(b.X, b.Y, b.Width, b.Height);
+        if (!prev.Maximized && next.Maximized) WindowState = FormWindowState.Maximized;
+
+        return result;
+    }
+
+    /// <summary>Callback invoked by SettingsForm on every user edit. Applies the delta and reflects any reverts back to the dialog.</summary>
+    void OnSettingsChanged(Settings newSettings)
+    {
+        var prev = _settings;
+        _settings = Apply(prev, newSettings);
+        // If Apply reverted a path due to load failure, push the corrected state back to the dialog.
+        if (!_settings.Equals(newSettings)) _settingsForm?.Refresh(_settings);
     }
 
     /// <summary>Loads a custom icon from a file. .ico files load directly; other image formats go via Bitmap.GetHicon and are cleaned up after cloning.</summary>
@@ -301,6 +341,7 @@ public class MainForm : Form
         {
             LoadImage(files[0]);
             _settings = _settings with { ImagePath = files[0] };
+            _settingsForm?.Refresh(_settings);
         }
         catch (FileNotFoundException)
         {
@@ -321,6 +362,7 @@ public class MainForm : Form
             if (image is null) return;
             SetImage(image);
             _settings = _settings with { ImagePath = Strings.PastedImage };
+            _settingsForm?.Refresh(_settings);
             return;
         }
 
@@ -332,6 +374,7 @@ public class MainForm : Form
         {
             LoadImage(imageFile);
             _settings = _settings with { ImagePath = imageFile };
+            _settingsForm?.Refresh(_settings);
         }
         catch (FileNotFoundException)
         {
@@ -343,11 +386,19 @@ public class MainForm : Form
         }
     }
 
-    /// <summary>Stub: opens or hides the Settings form. Surfaces a placeholder message until SettingsForm is ported.</summary>
+    /// <summary>Shows or hides the SettingsForm; creates it on first call. The dialog is modeless and owned by this form.</summary>
     void ToggleSettings()
     {
-        // TODO: open SettingsForm and pass _settings + a callback that updates _settings and re-applies.
-        MessageBox.Show(this, "Settings dialog not yet implemented in this build.", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        if (_settingsForm is null)
+        {
+            _settingsForm = new SettingsForm(_settings, OnSettingsChanged);
+            _settingsForm.AutoSizeRequested += (_, _) => DoAutoSize();
+        }
+
+        if (_settingsForm.Visible)
+            _settingsForm.Hide();
+        else
+            _settingsForm.Show(this);
     }
 
     /// <summary>Shows a message-box error tied to this form, captioned with the application product name.</summary>
