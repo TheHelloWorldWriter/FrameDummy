@@ -147,7 +147,7 @@ public partial class SettingsForm
         AutoScaleMode = AutoScaleMode.Font;
         AutoSize = true;
         BackColor = Color.Gainsboro;
-        ClientSize = new Size(623, 371);
+        ClientSize = new Size(623, 346);
         Font = SystemFonts.MessageBoxFont!;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         KeyPreview = true;
@@ -398,10 +398,10 @@ public partial class SettingsForm
             if (mode != PictureBoxSizeMode.AutoSize) _imageSizingComboBox.Items.Add(mode);
         _imageSizingComboBox.SelectedIndexChanged += OnImageSizingChanged;
 
-        // _autoSizeButton
+        // _autoSizeButton (height matches the Sizing combo box to its left)
         _autoSizeButton.AutoSize = false;
         _autoSizeButton.Margin = new Padding(3, 0, 3, 0);
-        _autoSizeButton.Size = new Size(87, 27);
+        _autoSizeButton.Size = new Size(87, 24);
         _autoSizeButton.Text = Strings.ButtonAutosize;
         _autoSizeButton.UseVisualStyleBackColor = true;
         _autoSizeButton.Click += OnAutoSizeClicked;
