@@ -7,68 +7,67 @@ namespace FrameDummy;
 public partial class SettingsForm
 {
     // Tab structure.
-    TabControl _tabControl = null!;
-    TabPage _frameTabPage = null!;
-    TabPage _contentTabPage = null!;
-    TabPage _prankTabPage = null!;
-    TabPage _aboutTabPage = null!;
+    TabControl _tabControl = new();
+    TabPage _frameTabPage = new();
+    TabPage _contentTabPage = new();
+    TabPage _prankTabPage = new();
+    TabPage _aboutTabPage = new();
 
     // Frame tab controls.
-    Label _titleLabel = null!;
-    TextBox _titleTextBox = null!;
-    Label _iconLabel = null!;
-    TextBox _iconTextBox = null!;
-    Button _iconBrowseButton = null!;
-    Button _iconDefaultButton = null!;
-    Label _borderLabel = null!;
-    ComboBox _borderComboBox = null!;
-    Label _opacityLabel = null!;
-    TrackBar _opacityTrackBar = null!;
-    CheckBox _controlBoxCheck = null!;
-    CheckBox _showIconCheck = null!;
-    CheckBox _minimizeBoxCheck = null!;
-    CheckBox _maximizeBoxCheck = null!;
-    CheckBox _showInTaskbarCheck = null!;
-    CheckBox _topmostCheck = null!;
+    Label _titleLabel = new();
+    TextBox _titleTextBox = new();
+    Label _iconLabel = new();
+    TextBox _iconTextBox = new();
+    Button _iconBrowseButton = new();
+    Button _iconDefaultButton = new();
+    Label _borderLabel = new();
+    ComboBox _borderComboBox = new();
+    Label _opacityLabel = new();
+    TrackBar _opacityTrackBar = new();
+    CheckBox _controlBoxCheck = new();
+    CheckBox _showIconCheck = new();
+    CheckBox _minimizeBoxCheck = new();
+    CheckBox _maximizeBoxCheck = new();
+    CheckBox _showInTaskbarCheck = new();
+    CheckBox _topmostCheck = new();
 
     // Content tab controls.
-    Label _imageLabel = null!;
-    TextBox _imageTextBox = null!;
-    Button _imageBrowseButton = null!;
-    Button _imageClearButton = null!;
-    Label _sizingLabel = null!;
-    ComboBox _imageSizingComboBox = null!;
-    Button _autoSizeButton = null!;
-    Label _colorLabel = null!;
-    Label _colorValueLabel = null!;
-    Button _colorBrowseButton = null!;
-    Button _colorRandomButton = null!;
-    CheckBox _colorTransparentCheck = null!;
+    Label _imageLabel = new();
+    TextBox _imageTextBox = new();
+    Button _imageBrowseButton = new();
+    Button _imageClearButton = new();
+    Label _sizingLabel = new();
+    ComboBox _imageSizingComboBox = new();
+    Button _autoSizeButton = new();
+    Label _colorLabel = new();
+    Label _colorValueLabel = new();
+    Button _colorBrowseButton = new();
+    Button _colorRandomButton = new();
+    CheckBox _colorTransparentCheck = new();
 
     // Prank tab controls.
-    Label _commandLabel = null!;
-    TextBox _commandTextBox = null!;
-    Label _prankIntroLabel = null!;
-    CheckBox _prankNoRightClickCheck = null!;
-    CheckBox _prankNoHotkeyCheck = null!;
-    CheckBox _prankNoCloseCheck = null!;
+    Label _commandLabel = new();
+    TextBox _commandTextBox = new();
+    Label _prankIntroLabel = new();
+    CheckBox _prankNoRightClickCheck = new();
+    CheckBox _prankNoHotkeyCheck = new();
+    CheckBox _prankNoCloseCheck = new();
 
     // About tab controls.
-    Label _aboutNameLabel = null!;
-    Label _aboutVersionLabel = null!;
-    Label _aboutCopyrightLabel = null!;
-    LinkLabel _aboutUrlLink = null!;
+    Label _aboutNameLabel = new();
+    Label _aboutVersionLabel = new();
+    Label _aboutCopyrightLabel = new();
+    LinkLabel _aboutUrlLink = new();
 
     // Layout panels (one FlowLayoutPanel per tab, matching v2's structure).
-    FlowLayoutPanel _frameFLP = null!;
-    FlowLayoutPanel _contentFLP = null!;
-    FlowLayoutPanel _prankFLP = null!;
-    FlowLayoutPanel _aboutFLP = null!;
+    FlowLayoutPanel _frameFLP = new();
+    FlowLayoutPanel _contentFLP = new();
+    FlowLayoutPanel _prankFLP = new();
+    FlowLayoutPanel _aboutFLP = new();
 
-    /// <summary>Builds the entire layout. Three-phase Designer-style flow: instantiate everything, configure each control in its labeled section, then add the tab control to the form.</summary>
+    /// <summary>Builds the entire layout: suspend, configure each section, add the tab control to the form, resume.</summary>
     void BuildLayout()
     {
-        InstantiateAll();
         SuspendLayout();
         ConfigureForm();
         ConfigureTabControl();
@@ -79,63 +78,6 @@ public partial class SettingsForm
         Controls.Add(_tabControl);
         ResumeLayout(false);
         PerformLayout();
-    }
-
-    /// <summary>Phase 1: create every control and layout panel up front, before any configuration.</summary>
-    void InstantiateAll()
-    {
-        _tabControl = new TabControl();
-        _frameTabPage = new TabPage();
-        _contentTabPage = new TabPage();
-        _prankTabPage = new TabPage();
-        _aboutTabPage = new TabPage();
-
-        _titleLabel = new Label();
-        _titleTextBox = new TextBox();
-        _iconLabel = new Label();
-        _iconTextBox = new TextBox();
-        _iconBrowseButton = new Button();
-        _iconDefaultButton = new Button();
-        _borderLabel = new Label();
-        _borderComboBox = new ComboBox();
-        _opacityLabel = new Label();
-        _opacityTrackBar = new TrackBar();
-        _controlBoxCheck = new CheckBox();
-        _showIconCheck = new CheckBox();
-        _minimizeBoxCheck = new CheckBox();
-        _maximizeBoxCheck = new CheckBox();
-        _showInTaskbarCheck = new CheckBox();
-        _topmostCheck = new CheckBox();
-
-        _imageLabel = new Label();
-        _imageTextBox = new TextBox();
-        _imageBrowseButton = new Button();
-        _imageClearButton = new Button();
-        _sizingLabel = new Label();
-        _imageSizingComboBox = new ComboBox();
-        _autoSizeButton = new Button();
-        _colorLabel = new Label();
-        _colorValueLabel = new Label();
-        _colorBrowseButton = new Button();
-        _colorRandomButton = new Button();
-        _colorTransparentCheck = new CheckBox();
-
-        _commandLabel = new Label();
-        _commandTextBox = new TextBox();
-        _prankIntroLabel = new Label();
-        _prankNoRightClickCheck = new CheckBox();
-        _prankNoHotkeyCheck = new CheckBox();
-        _prankNoCloseCheck = new CheckBox();
-
-        _aboutNameLabel = new Label();
-        _aboutVersionLabel = new Label();
-        _aboutCopyrightLabel = new Label();
-        _aboutUrlLink = new LinkLabel();
-
-        _frameFLP = new FlowLayoutPanel();
-        _contentFLP = new FlowLayoutPanel();
-        _prankFLP = new FlowLayoutPanel();
-        _aboutFLP = new FlowLayoutPanel();
     }
 
     /// <summary>Form-level properties: the SettingsForm itself.</summary>
