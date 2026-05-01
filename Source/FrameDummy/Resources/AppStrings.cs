@@ -7,7 +7,7 @@ namespace FrameDummy;
 /// User-facing strings, centralized in one place. Keeps string literals out of UI files
 /// and makes future localization a matter of swapping this class.
 /// </summary>
-public static class Strings
+public static class AppStrings
 {
     // // MainForm.
 

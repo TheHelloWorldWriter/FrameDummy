@@ -40,7 +40,7 @@ public partial class MainForm : Form
         InitializeComponent();
 
         MainForm.TheMainForm = this;
-        Text = Strings.DefaultTitle;
+        Text = AppStrings.DefaultTitle;
         settingsForm = new SettingsForm();
         defaultIcon = Icon;
     }
@@ -85,7 +85,7 @@ public partial class MainForm : Form
         {
             MessageBox.Show(
                 this,
-                string.Format(CultureInfo.CurrentCulture, Strings.IconLoadErrorFormat, iconFilePath),
+                string.Format(CultureInfo.CurrentCulture, AppStrings.IconLoadErrorFormat, iconFilePath),
                 Application.ProductName,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
@@ -143,7 +143,7 @@ public partial class MainForm : Form
         {
             MessageBox.Show(
                 this,
-                string.Format(CultureInfo.CurrentCulture, Strings.ImageLoadErrorFormat, imageFile),
+                string.Format(CultureInfo.CurrentCulture, AppStrings.ImageLoadErrorFormat, imageFile),
                 Application.ProductName,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
@@ -152,7 +152,7 @@ public partial class MainForm : Form
         {
             MessageBox.Show(
                 this,
-                string.Format(CultureInfo.CurrentCulture, Strings.ImageNotFoundErrorFormat, imageFile),
+                string.Format(CultureInfo.CurrentCulture, AppStrings.ImageNotFoundErrorFormat, imageFile),
                 Application.ProductName,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
@@ -233,7 +233,7 @@ public partial class MainForm : Form
                     {
                         string message = string.Format(
                             CultureInfo.CurrentCulture,
-                            Strings.CommandErrorFormat,
+                            AppStrings.CommandErrorFormat,
                             command,
                             ex.Message);
                         MessageBox.Show(
@@ -346,7 +346,7 @@ public partial class MainForm : Form
         if (Clipboard.ContainsImage())
         {
             SetImage(Clipboard.GetImage());
-            settingsForm.UpdateImageFilePath(Strings.PastedImage);
+            settingsForm.UpdateImageFilePath(AppStrings.PastedImage);
         }
         else if (Clipboard.ContainsFileDropList())
         {

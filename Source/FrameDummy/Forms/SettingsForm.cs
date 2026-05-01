@@ -55,7 +55,7 @@ public partial class SettingsForm : Form
 
         this.imageSizingComboBox.SelectedIndex = 3;
 
-        this.titleTextBox.Text = Strings.DefaultTitle;
+        this.titleTextBox.Text = AppStrings.DefaultTitle;
         this.versionLabel.Text = string.Format(CultureInfo.CurrentCulture, this.versionLabel.Text, Application.ProductVersion);
         string year = Math.Max(DateTime.Today.Year, 2015).ToString();
         this.copyrightLabel.Text = string.Format(CultureInfo.CurrentCulture, this.copyrightLabel.Text, year);
@@ -246,7 +246,7 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void EventIconDefaultButtonClick(object sender, EventArgs e)
     {
-        this.iconTextBox.Text = Strings.DefaultIcon;
+        this.iconTextBox.Text = AppStrings.DefaultIcon;
         MainForm.TheMainForm.RestoreIcon();
     }
 
@@ -346,7 +346,7 @@ public partial class SettingsForm : Form
     private void EventImageClearButtonClick(object sender, EventArgs e)
     {
         MainForm.TheMainForm.SetImage(null);
-        this.imageTextBox.Text = Strings.NoImage;
+        this.imageTextBox.Text = AppStrings.NoImage;
         GC.Collect();
     }
 
@@ -445,7 +445,7 @@ public partial class SettingsForm : Form
     /// <param name="iconFilePath">The icon file path.</param>
     private void DoLoadIcon(string iconFilePath)
     {
-        if (!(string.IsNullOrEmpty(iconFilePath) || iconFilePath.Equals(Strings.DefaultIcon)))
+        if (!(string.IsNullOrEmpty(iconFilePath) || iconFilePath.Equals(AppStrings.DefaultIcon)))
         {
             if (MainForm.TheMainForm.LoadIcon(iconFilePath))
             {
@@ -460,7 +460,7 @@ public partial class SettingsForm : Form
     /// <param name="imageFilePath">The image file path.</param>
     private void DoLoadImage(string imageFilePath)
     {
-        if (!(string.IsNullOrEmpty(imageFilePath) || imageFilePath.Equals(Strings.NoImage) || imageFilePath.Equals(Strings.PastedImage)))
+        if (!(string.IsNullOrEmpty(imageFilePath) || imageFilePath.Equals(AppStrings.NoImage) || imageFilePath.Equals(AppStrings.PastedImage)))
         {
             if (MainForm.TheMainForm.LoadImage(imageFilePath))
             {
