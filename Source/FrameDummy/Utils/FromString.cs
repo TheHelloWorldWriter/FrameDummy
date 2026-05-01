@@ -28,17 +28,11 @@ public static class FromString
     {
         if (!string.IsNullOrEmpty(value))
         {
-            if (successAction != null)
-            {
-                successAction(value);
-            }
+            successAction?.Invoke(value);
         }
         else
         {
-            if (failAction != null)
-            {
-                failAction(value);
-            }
+            failAction?.Invoke(value);
         }
     }
 
@@ -51,14 +45,13 @@ public static class FromString
     /// <param name="failAction">The action delegate to execute on failure.</param>
     public static void IfInt(string value, Action<int> successAction, Action<string> failAction)
     {
-        int i;
-        if (int.TryParse(value, out i))
+        if (int.TryParse(value, out int i))
         {
-            FromString.SafeInvoke<int>(successAction, i);
+            SafeInvoke(successAction, i);
         }
         else
         {
-            FromString.SafeInvoke<string>(failAction, value);
+            SafeInvoke(failAction, value);
         }
     }
 
@@ -73,8 +66,7 @@ public static class FromString
     public static void IfIntPair(string value, char separator, IntPairAction successAction, Action<string> failAction)
     {
         string[] pair = value.Split(separator);
-        int i, j;
-        if ((pair.Length > 1) && int.TryParse(pair[0].Trim(), out i) && int.TryParse(pair[1].Trim(), out j))
+        if ((pair.Length > 1) && int.TryParse(pair[0].Trim(), out int i) && int.TryParse(pair[1].Trim(), out int j))
         {
             if (successAction != null)
             {
@@ -83,7 +75,7 @@ public static class FromString
             }
         }
 
-        FromString.SafeInvoke<string>(failAction, value);
+        SafeInvoke(failAction, value);
     }
 
     /// <summary>
@@ -95,14 +87,13 @@ public static class FromString
     /// <param name="failAction">The action delegate to execute on failure.</param>
     public static void IfBool(string value, Action<bool> successAction, Action<string> failAction)
     {
-        bool b;
-        if (bool.TryParse(value, out b))
+        if (bool.TryParse(value, out bool b))
         {
-            FromString.SafeInvoke<bool>(successAction, b);
+            SafeInvoke(successAction, b);
         }
         else
         {
-            FromString.SafeInvoke<string>(failAction, value);
+            SafeInvoke(failAction, value);
         }
     }
 
@@ -115,14 +106,13 @@ public static class FromString
     /// <param name="failAction">The action delegate to execute on failure.</param>
     public static void IfDouble(string value, Action<double> successAction, Action<string> failAction)
     {
-        double d;
-        if (double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out d))
+        if (double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out double d))
         {
-            FromString.SafeInvoke<double>(successAction, d);
+            SafeInvoke(successAction, d);
         }
         else
         {
-            FromString.SafeInvoke<string>(failAction, value);
+            SafeInvoke(failAction, value);
         }
     }
 
@@ -140,11 +130,11 @@ public static class FromString
         try
         {
             T enumValue = (T)Enum.Parse(typeof(T), value);
-            FromString.SafeInvoke<T>(successAction, enumValue);
+            SafeInvoke(successAction, enumValue);
         }
         catch (Exception)
         {
-            FromString.SafeInvoke<string>(failAction, value);
+            SafeInvoke(failAction, value);
         }
     }
 
@@ -157,14 +147,13 @@ public static class FromString
     /// <param name="failAction">The action delegate to execute on failure.</param>
     public static void IfTimeSpan(string value, Action<TimeSpan> successAction, Action<string> failAction)
     {
-        TimeSpan timeSpan;
-        if (TimeSpan.TryParse(value, out timeSpan))
+        if (TimeSpan.TryParse(value, out TimeSpan timeSpan))
         {
-            FromString.SafeInvoke<TimeSpan>(successAction, timeSpan);
+            SafeInvoke(successAction, timeSpan);
         }
         else
         {
-            FromString.SafeInvoke<string>(failAction, value);
+            SafeInvoke(failAction, value);
         }
     }
 
@@ -183,16 +172,16 @@ public static class FromString
             Color color = ColorTranslator.FromHtml(value);
             if (!color.IsEmpty)
             {
-                FromString.SafeInvoke<Color>(successAction, color);
+                SafeInvoke(successAction, color);
             }
             else
             {
-                FromString.SafeInvoke<string>(failAction, value);
+                SafeInvoke(failAction, value);
             }
         }
         catch
         {
-            FromString.SafeInvoke<string>(failAction, value);
+            SafeInvoke(failAction, value);
         }
     }
 
@@ -208,12 +197,12 @@ public static class FromString
     {
         try
         {
-            Point point = (Point)new PointConverter().ConvertFromInvariantString(value);
-            FromString.SafeInvoke<Point>(successAction, point);
+            Point point = (Point)new PointConverter().ConvertFromInvariantString(value)!;
+            SafeInvoke(successAction, point);
         }
         catch (Exception)
         {
-            FromString.SafeInvoke<string>(failAction, value);
+            SafeInvoke(failAction, value);
         }
     }
 
@@ -229,12 +218,12 @@ public static class FromString
     {
         try
         {
-            Rectangle rect = (Rectangle)new RectangleConverter().ConvertFromInvariantString(value);
-            FromString.SafeInvoke<Rectangle>(successAction, rect);
+            Rectangle rect = (Rectangle)new RectangleConverter().ConvertFromInvariantString(value)!;
+            SafeInvoke(successAction, rect);
         }
         catch (Exception)
         {
-            FromString.SafeInvoke<string>(failAction, value);
+            SafeInvoke(failAction, value);
         }
     }
 
@@ -250,12 +239,12 @@ public static class FromString
     {
         try
         {
-            Keys keys = (Keys)new KeysConverter().ConvertFromString(value);
-            FromString.SafeInvoke<Keys>(successAction, keys);
+            Keys keys = (Keys)new KeysConverter().ConvertFromString(value)!;
+            SafeInvoke(successAction, keys);
         }
         catch (Exception)
         {
-            FromString.SafeInvoke<string>(failAction, value);
+            SafeInvoke(failAction, value);
         }
     }
 
@@ -267,10 +256,6 @@ public static class FromString
     /// <param name="parameter">The parameter for the action delegate.</param>
     private static void SafeInvoke<T>(Action<T> action, T parameter)
     {
-        if (action != null)
-        {
-            action(parameter);
-        }
+        action?.Invoke(parameter);
     }
 }
-
