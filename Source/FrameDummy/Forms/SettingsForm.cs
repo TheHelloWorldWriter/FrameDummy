@@ -11,15 +11,6 @@ namespace FrameDummy;
 /// </summary>
 public partial class SettingsForm : Form
 {
-    #region Fields
-
-    /// <summary>
-    /// A random number generator used to create random colors
-    /// </summary>
-    private Random random;
-
-    #endregion
-
     #region Constructor
 
     /// <summary>
@@ -33,11 +24,8 @@ public partial class SettingsForm : Form
         // Required method for designer support
         InitializeComponent();
 
-        // Initialize the random number generator used to create random colors
-        random = new Random();
-
         // Add frame border styles
-        foreach (FormBorderStyle style in Enum.GetValues(typeof(FormBorderStyle)))
+        foreach (FormBorderStyle style in Enum.GetValues<FormBorderStyle>())
         {
             borderComboBox.Items.Add(style.ToString());
         }
@@ -45,7 +33,7 @@ public partial class SettingsForm : Form
         borderComboBox.SelectedIndex = 4;
 
         // Add frame border styles
-        foreach (PictureBoxSizeMode sizeMode in Enum.GetValues(typeof(PictureBoxSizeMode)))
+        foreach (PictureBoxSizeMode sizeMode in Enum.GetValues<PictureBoxSizeMode>())
         {
             if (sizeMode != PictureBoxSizeMode.AutoSize)
             {
@@ -79,7 +67,7 @@ public partial class SettingsForm : Form
     /// </summary>
     public void LoadLayout()
     {
-        VerySimpleIni iniFile = new VerySimpleIni(AppSettings.IniFileName, Application.ExecutablePath, Application.CompanyName, Application.ProductName, false);
+        VerySimpleIni iniFile = new(AppSettings.IniFileName, Application.ExecutablePath, Application.CompanyName ?? string.Empty, Application.ProductName ?? string.Empty, false);
 
         if (iniFile.Load())
         {
@@ -121,7 +109,7 @@ public partial class SettingsForm : Form
     /// </summary>
     public void SaveLayout()
     {
-        VerySimpleIni iniFile = new VerySimpleIni(AppSettings.IniFileName, Application.ExecutablePath, Application.CompanyName, Application.ProductName, true);
+        VerySimpleIni iniFile = new(AppSettings.IniFileName, Application.ExecutablePath, Application.CompanyName ?? string.Empty, Application.ProductName ?? string.Empty, true);
 
         if (iniFile.IsReady)
         {
@@ -145,7 +133,7 @@ public partial class SettingsForm : Form
             iniFile.SetValue(colorTransparentCheckBox.Name, colorTransparentCheckBox.Checked);
 
             Rectangle bounds = MainForm.TheMainForm.WindowState == FormWindowState.Normal ? MainForm.TheMainForm.Bounds : MainForm.TheMainForm.RestoreBounds;
-            iniFile.SetValue(MainForm.TheMainForm.Name, new RectangleConverter().ConvertToInvariantString(bounds));
+            iniFile.SetValue(MainForm.TheMainForm.Name, new RectangleConverter().ConvertToInvariantString(bounds) ?? string.Empty);
             iniFile.SetValue(AppSettings.MaximizedKey, MainForm.TheMainForm.WindowState == FormWindowState.Maximized);
 
             try
@@ -258,7 +246,7 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void EventBorderComboBoxSelectedIndexChanged(object sender, EventArgs e)
     {
-        MainForm.TheMainForm.FormBorderStyle = (FormBorderStyle)Enum.Parse(typeof(FormBorderStyle), borderComboBox.SelectedItem.ToString());
+        MainForm.TheMainForm.FormBorderStyle = Enum.Parse<FormBorderStyle>(borderComboBox.SelectedItem!.ToString()!);
     }
 
     /// <summary>
@@ -358,7 +346,7 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void EventImageSizingComboBoxSelectedIndexChanged(object sender, EventArgs e)
     {
-        MainForm.TheMainForm.SetSizeMode((PictureBoxSizeMode)Enum.Parse(typeof(PictureBoxSizeMode), imageSizingComboBox.SelectedItem.ToString()));
+        MainForm.TheMainForm.SetSizeMode(Enum.Parse<PictureBoxSizeMode>(imageSizingComboBox.SelectedItem!.ToString()!));
     }
 
     /// <summary>
@@ -391,6 +379,7 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void EventColorRandomButtonClick(object sender, EventArgs e)
     {
+        var random = Random.Shared;
         colorValueLabel.BackColor = Color.FromArgb(random.Next(256), random.Next(256), random.Next(256));
     }
 

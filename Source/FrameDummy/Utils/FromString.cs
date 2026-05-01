@@ -24,7 +24,7 @@ public static class FromString
     /// <param name="value">The string value to test.</param>
     /// <param name="successAction">The action delegate to be executed if the string is not null and not empty.</param>
     /// <param name="failAction">The action delegate to be executed if the string is null or empty.</param>
-    public static void IfNonemptyString(string value, Action<string> successAction, Action<string> failAction)
+    public static void IfNonemptyString(string value, Action<string>? successAction, Action<string>? failAction)
     {
         if (!string.IsNullOrEmpty(value))
         {
@@ -43,7 +43,7 @@ public static class FromString
     /// <param name="value">The string value to parse.</param>
     /// <param name="successAction">The action delegate to execute on success.</param>
     /// <param name="failAction">The action delegate to execute on failure.</param>
-    public static void IfInt(string value, Action<int> successAction, Action<string> failAction)
+    public static void IfInt(string value, Action<int>? successAction, Action<string>? failAction)
     {
         if (int.TryParse(value, out int i))
         {
@@ -63,7 +63,7 @@ public static class FromString
     /// <param name="separator">The character that separates the two integer values.</param>
     /// <param name="successAction">The action delegate to execute on success.</param>
     /// <param name="failAction">The action delegate to execute on failure.</param>
-    public static void IfIntPair(string value, char separator, IntPairAction successAction, Action<string> failAction)
+    public static void IfIntPair(string value, char separator, IntPairAction? successAction, Action<string>? failAction)
     {
         string[] pair = value.Split(separator);
         if ((pair.Length > 1) && int.TryParse(pair[0].Trim(), out int i) && int.TryParse(pair[1].Trim(), out int j))
@@ -85,7 +85,7 @@ public static class FromString
     /// <param name="value">The string value to parse.</param>
     /// <param name="successAction">The action delegate to execute on success.</param>
     /// <param name="failAction">The action delegate to execute on failure.</param>
-    public static void IfBool(string value, Action<bool> successAction, Action<string> failAction)
+    public static void IfBool(string value, Action<bool>? successAction, Action<string>? failAction)
     {
         if (bool.TryParse(value, out bool b))
         {
@@ -104,7 +104,7 @@ public static class FromString
     /// <param name="value">The string value to parse.</param>
     /// <param name="successAction">The action delegate to execute on success.</param>
     /// <param name="failAction">The action delegate to execute on failure.</param>
-    public static void IfDouble(string value, Action<double> successAction, Action<string> failAction)
+    public static void IfDouble(string value, Action<double>? successAction, Action<string>? failAction)
     {
         if (double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out double d))
         {
@@ -125,7 +125,7 @@ public static class FromString
     /// <param name="successAction">The action delegate to execute on success.</param>
     /// <param name="failAction">The action delegate to execute on failure.</param>
     [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We invoke an failure handler on exceptions.")]
-    public static void IfEnum<T>(string value, Action<T> successAction, Action<string> failAction)
+    public static void IfEnum<T>(string value, Action<T>? successAction, Action<string>? failAction)
     {
         try
         {
@@ -145,7 +145,7 @@ public static class FromString
     /// <param name="value">The string value to parse.</param>
     /// <param name="successAction">The action delegate to execute on success.</param>
     /// <param name="failAction">The action delegate to execute on failure.</param>
-    public static void IfTimeSpan(string value, Action<TimeSpan> successAction, Action<string> failAction)
+    public static void IfTimeSpan(string value, Action<TimeSpan>? successAction, Action<string>? failAction)
     {
         if (TimeSpan.TryParse(value, out TimeSpan timeSpan))
         {
@@ -165,7 +165,7 @@ public static class FromString
     /// <param name="successAction">The delegate to execute on success.</param>
     /// <param name="failAction">The delegate to execute on failure.</param>
     [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We invoke an failure handler on exceptions.")]
-    public static void IfHtmlColor(string value, Action<Color> successAction, Action<string> failAction)
+    public static void IfHtmlColor(string value, Action<Color>? successAction, Action<string>? failAction)
     {
         try
         {
@@ -193,7 +193,7 @@ public static class FromString
     /// <param name="successAction">The action delegate to execute on success.</param>
     /// <param name="failAction">The action delegate to execute on failure.</param>
     [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We invoke an failure handler on exceptions.")]
-    public static void IfPoint(string value, Action<Point> successAction, Action<string> failAction)
+    public static void IfPoint(string value, Action<Point>? successAction, Action<string>? failAction)
     {
         try
         {
@@ -214,7 +214,7 @@ public static class FromString
     /// <param name="successAction">The action delegate to execute on success.</param>
     /// <param name="failAction">The action delegate to execute on failure.</param>
     [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We invoke an failure handler on exceptions.")]
-    public static void IfRectangle(string value, Action<Rectangle> successAction, Action<string> failAction)
+    public static void IfRectangle(string value, Action<Rectangle>? successAction, Action<string>? failAction)
     {
         try
         {
@@ -235,7 +235,7 @@ public static class FromString
     /// <param name="successAction">The action delegate to execute on success.</param>
     /// <param name="failAction">The action delegate to execute on failure.</param>
     [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We invoke an failure handler on exceptions.")]
-    public static void IfKeys(string value, Action<Keys> successAction, Action<string> failAction)
+    public static void IfKeys(string value, Action<Keys>? successAction, Action<string>? failAction)
     {
         try
         {
@@ -254,7 +254,7 @@ public static class FromString
     /// <typeparam name="T">The type of the parameter for the action delegate.</typeparam>
     /// <param name="action">The action delegate to invoke.</param>
     /// <param name="parameter">The parameter for the action delegate.</param>
-    private static void SafeInvoke<T>(Action<T> action, T parameter)
+    private static void SafeInvoke<T>(Action<T>? action, T parameter)
     {
         action?.Invoke(parameter);
     }
