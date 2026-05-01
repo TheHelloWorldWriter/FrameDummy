@@ -67,41 +67,32 @@ public partial class SettingsForm : Form
     /// </summary>
     public void LoadLayout()
     {
-        VerySimpleIni iniFile = new VerySimpleIni(Properties.Resources.StringIniFileName, Application.ExecutablePath, Application.CompanyName, Application.ProductName, false);
+        Settings s = SettingsStore.Load();
 
-        if (iniFile.Load())
-        {
-            this.titleTextBox.Text = iniFile.GetValue(this.titleTextBox.Name, this.titleTextBox.Text);
-            this.DoLoadIcon(iniFile.GetValue(this.iconTextBox.Name));
-            FromString.IfInt(iniFile.GetValue(this.borderComboBox.Name), value => { this.borderComboBox.SelectedIndex = value; }, null);
-            FromString.IfInt(iniFile.GetValue(this.opacityTrackBar.Name), value => { this.opacityTrackBar.Value = value; }, null);
+        _titleTextBox.Text = s.Title;
+        DoLoadIcon(s.IconPath ?? string.Empty);
+        _borderComboBox.SelectedIndex = (int)s.Border;
+        _opacityTrackBar.Value = s.Opacity;
 
-            FromString.IfBool(iniFile.GetValue(this.controlCheckBox.Name), value => { this.controlCheckBox.Checked = value; }, null);
-            FromString.IfBool(iniFile.GetValue(this.iconCheckBox.Name), value => { this.iconCheckBox.Checked = value; }, null);
-            FromString.IfBool(iniFile.GetValue(this.minimizeCheckBox.Name), value => { this.minimizeCheckBox.Checked = value; }, null);
-            FromString.IfBool(iniFile.GetValue(this.maximizeCheckBox.Name), value => { this.maximizeCheckBox.Checked = value; }, null);
-            FromString.IfBool(iniFile.GetValue(this.taskbarCheckBox.Name), value => { this.taskbarCheckBox.Checked = value; }, null);
-            FromString.IfBool(iniFile.GetValue(this.topmostCheckBox.Name), value => { this.topmostCheckBox.Checked = value; }, null);
+        _controlBoxCheck.Checked = s.ControlBox;
+        _showIconCheck.Checked = s.ShowIcon;
+        _minimizeBoxCheck.Checked = s.MinimizeBox;
+        _maximizeBoxCheck.Checked = s.MaximizeBox;
+        _showInTaskbarCheck.Checked = s.ShowInTaskbar;
+        _topmostCheck.Checked = s.TopMost;
 
-            this.commandTextBox.Text = iniFile.GetValue(this.commandTextBox.Name, string.Empty);
+        _commandTextBox.Text = s.PrankCommand;
 
-            this.DoLoadImage(iniFile.GetValue(this.imageTextBox.Name));
-            FromString.IfInt(iniFile.GetValue(this.imageSizingComboBox.Name), value => { this.imageSizingComboBox.SelectedIndex = value; }, null);
-            FromString.IfHtmlColor(iniFile.GetValue(this.colorValueLabel.Name), value => { this.colorValueLabel.BackColor = value; }, null);
-            FromString.IfBool(iniFile.GetValue(this.colorTransparentCheckBox.Name), value => { this.colorTransparentCheckBox.Checked = value; }, null);
+        DoLoadImage(s.ImagePath ?? string.Empty);
+        // PictureBoxSizeMode.AutoSize (=3) is excluded from the combo, so enum values past it shift down by one.
+        int sizingIdx = (int)s.ImageSizing;
+        if (s.ImageSizing > PictureBoxSizeMode.AutoSize) sizingIdx -= 1;
+        _imageSizingComboBox.SelectedIndex = sizingIdx;
+        _colorValueLabel.BackColor = ColorTranslator.FromHtml(s.Color);
+        _colorTransparentCheck.Checked = s.ColorTransparent;
 
-            FromString.IfRectangle(iniFile.GetValue(MainForm.TheMainForm.Name), value => { MainForm.TheMainForm.Bounds = value; }, null);
-            FromString.IfBool(
-                iniFile.GetValue(Properties.Resources.StringIniMaximized),
-                value =>
-                {
-                    if (value)
-                    {
-                        MainForm.TheMainForm.WindowState = FormWindowState.Maximized;
-                    }
-                },
-                null);
-        }
+        if (s.Bounds is { } b) MainForm.TheMainForm.Bounds = new Rectangle(b.X, b.Y, b.Width, b.Height);
+        if (s.Maximized) MainForm.TheMainForm.WindowState = FormWindowState.Maximized;
     }
 
     /// <summary>
@@ -109,42 +100,38 @@ public partial class SettingsForm : Form
     /// </summary>
     public void SaveLayout()
     {
-        VerySimpleIni iniFile = new VerySimpleIni(Properties.Resources.StringIniFileName, Application.ExecutablePath, Application.CompanyName, Application.ProductName, true);
+        // PictureBoxSizeMode.AutoSize (=3) is excluded from the combo, so combo indices at/past it shift up by one to recover the enum value.
+        int sizingIdx = _imageSizingComboBox.SelectedIndex;
+        PictureBoxSizeMode imageSizing = sizingIdx >= (int)PictureBoxSizeMode.AutoSize
+            ? (PictureBoxSizeMode)(sizingIdx + 1)
+            : (PictureBoxSizeMode)sizingIdx;
 
-        if (iniFile.IsReady)
+        Rectangle bounds = MainForm.TheMainForm.WindowState == FormWindowState.Normal
+            ? MainForm.TheMainForm.Bounds
+            : MainForm.TheMainForm.RestoreBounds;
+
+        Settings settings = new()
         {
-            iniFile.SetValue(this.titleTextBox.Name, this.titleTextBox.Text);
-            iniFile.SetValue(this.iconTextBox.Name, this.iconTextBox.Text);
-            iniFile.SetValue(this.borderComboBox.Name, this.borderComboBox.SelectedIndex);
-            iniFile.SetValue(this.opacityTrackBar.Name, this.opacityTrackBar.Value);
+            Title = _titleTextBox.Text,
+            IconPath = _iconTextBox.Text,
+            Border = (FormBorderStyle)_borderComboBox.SelectedIndex,
+            Opacity = _opacityTrackBar.Value,
+            ControlBox = _controlBoxCheck.Checked,
+            ShowIcon = _showIconCheck.Checked,
+            MinimizeBox = _minimizeBoxCheck.Checked,
+            MaximizeBox = _maximizeBoxCheck.Checked,
+            ShowInTaskbar = _showInTaskbarCheck.Checked,
+            TopMost = _topmostCheck.Checked,
+            PrankCommand = _commandTextBox.Text,
+            ImagePath = _imageTextBox.Text,
+            ImageSizing = imageSizing,
+            Color = ColorTranslator.ToHtml(_colorValueLabel.BackColor),
+            ColorTransparent = _colorTransparentCheck.Checked,
+            Bounds = new WindowBounds(bounds.X, bounds.Y, bounds.Width, bounds.Height),
+            Maximized = MainForm.TheMainForm.WindowState == FormWindowState.Maximized,
+        };
 
-            iniFile.SetValue(this.controlCheckBox.Name, this.controlCheckBox.Checked);
-            iniFile.SetValue(this.iconCheckBox.Name, this.iconCheckBox.Checked);
-            iniFile.SetValue(this.minimizeCheckBox.Name, this.minimizeCheckBox.Checked);
-            iniFile.SetValue(this.maximizeCheckBox.Name, this.maximizeCheckBox.Checked);
-            iniFile.SetValue(this.taskbarCheckBox.Name, this.taskbarCheckBox.Checked);
-            iniFile.SetValue(this.topmostCheckBox.Name, this.topmostCheckBox.Checked);
-
-            iniFile.SetValue(this.commandTextBox.Name, this.commandTextBox.Text);
-
-            iniFile.SetValue(this.imageTextBox.Name, this.imageTextBox.Text);
-            iniFile.SetValue(this.imageSizingComboBox.Name, this.imageSizingComboBox.SelectedIndex);
-            iniFile.SetValue(this.colorValueLabel.Name, ColorTranslator.ToHtml(this.colorValueLabel.BackColor));
-            iniFile.SetValue(this.colorTransparentCheckBox.Name, this.colorTransparentCheckBox.Checked);
-
-            Rectangle bounds = MainForm.TheMainForm.WindowState == FormWindowState.Normal ? MainForm.TheMainForm.Bounds : MainForm.TheMainForm.RestoreBounds;
-            iniFile.SetValue(MainForm.TheMainForm.Name, new RectangleConverter().ConvertToInvariantString(bounds));
-            iniFile.SetValue(Properties.Resources.StringIniMaximized, MainForm.TheMainForm.WindowState == FormWindowState.Maximized);
-
-            try
-            {
-                iniFile.Save();
-            }
-            catch
-            {
-                // Ignore configuration save errors
-            }
-        }
+        SettingsStore.Save(settings);
     }
 
     #endregion
@@ -346,7 +333,7 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void OnImageSizingChanged(object? sender, EventArgs e)
     {
-        MainForm.TheMainForm.SetSizeMode(Enum.Parse<PictureBoxSizeMode>(this._imageSizingComboBox.SelectedItem.ToString()));
+        MainForm.TheMainForm.SetSizeMode(Enum.Parse<PictureBoxSizeMode>(_imageSizingComboBox.SelectedItem.ToString()));
     }
 
     /// <summary>
