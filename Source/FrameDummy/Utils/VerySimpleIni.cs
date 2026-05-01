@@ -11,12 +11,12 @@ public class VerySimpleIni
     /// <summary>
     /// The INI key=value separator.
     /// </summary>
-    private static readonly char[] KeyValueSeparator = { '=' };
+    private static readonly char[] s_keyValueSeparator = ['='];
 
     /// <summary>
     /// The lines from the INI file containing the settings.
     /// </summary>
-    private List<string> lines = null;
+    private List<string>? _lines = null;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="VerySimpleIni"/> class, using a full configuration file pathname.
@@ -40,7 +40,7 @@ public class VerySimpleIni
     {
         // First check if we have an INI file in the directory where the program main executable
         // file is located (to support portable programs)
-        string portableIniFile = FileName = Path.Combine(Path.GetDirectoryName(executablePath), iniNameOnly);
+        string portableIniFile = FileName = Path.Combine(Path.GetDirectoryName(executablePath) ?? string.Empty, iniNameOnly);
 
         // If no INI file is found, try the program data directory from the ApplicationData
         // special directory for the current roaming user
@@ -84,10 +84,10 @@ public class VerySimpleIni
         if (IsReady)
         {
             // Read all the lines, trim off any white-space characters from each line and remove empty lines
-            lines = new List<string>(File.ReadAllLines(FileName));
-            lines.ConvertAll<string>(line => line.Trim());
-            lines.RemoveAll(line => { return string.IsNullOrEmpty(line); });
-            return (lines != null) && (lines.Count > 0);
+            _lines = [.. File.ReadAllLines(FileName)];
+            _lines = _lines.ConvertAll<string>(line => line.Trim());
+            _lines.RemoveAll(line => { return string.IsNullOrEmpty(line); });
+            return _lines.Count > 0;
         }
 
         return false;
@@ -101,19 +101,19 @@ public class VerySimpleIni
     /// <returns>The setting value.</returns>
     public string GetValue(string key, string defaultValue)
     {
-        if ((lines != null) && (lines.Count > 0))
+        if ((_lines != null) && (_lines.Count > 0))
         {
             // Find the line that starts with the specified key ("key=value")
-            int index = lines.FindIndex(line => { return line.StartsWith(key, true, null); });
+            int index = _lines.FindIndex(line => { return line.StartsWith(key, true, null); });
             if (index >= 0)
             {
                 // If line is found, save a reference to it and remove it from the list, to ensure faster
                 // future key look-ups
-                string line = lines[index];
-                lines.RemoveAt(index);
+                string line = _lines[index];
+                _lines.RemoveAt(index);
 
                 // Split the line in the "name=value" format and return the "value" part
-                string[] lineParts = line.Split(VerySimpleIni.KeyValueSeparator, 2);
+                string[] lineParts = line.Split(VerySimpleIni.s_keyValueSeparator, 2);
                 if (lineParts.Length == 2)
                 {
                     return lineParts[1].Trim();
@@ -139,10 +139,7 @@ public class VerySimpleIni
     /// </summary>
     public void Clear()
     {
-        if (lines != null)
-        {
-            lines.Clear();
-        }
+        _lines?.Clear();
     }
 
     /// <summary>
@@ -152,12 +149,9 @@ public class VerySimpleIni
     /// <param name="value">The value of the setting.</param>
     public void SetValue(string key, string value)
     {
-        if (lines == null)
-        {
-            lines = new List<string>();
-        }
+        _lines ??= [];
 
-        lines.Add(string.Concat(key, VerySimpleIni.KeyValueSeparator[0].ToString(), value));
+        _lines.Add(string.Concat(key, VerySimpleIni.s_keyValueSeparator[0].ToString(), value));
     }
 
     /// <summary>
@@ -167,7 +161,7 @@ public class VerySimpleIni
     /// <param name="value">The value of the setting.</param>
     public void SetValue(string key, object value)
     {
-        SetValue(key, value.ToString());
+        SetValue(key, value.ToString() ?? String.Empty);
     }
 
     /// <summary>
@@ -176,9 +170,9 @@ public class VerySimpleIni
     /// <returns>True if the saving was successful, false otherwise.</returns>
     public bool Save()
     {
-        if ((lines != null) && (lines.Count > 0) && IsReady)
+        if ((_lines != null) && (_lines.Count > 0) && IsReady)
         {
-            File.WriteAllLines(FileName, lines.ToArray());
+            File.WriteAllLines(FileName, [.. _lines]);
             return true;
         }
 
