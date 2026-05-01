@@ -11,15 +11,6 @@ namespace FrameDummy;
 /// </summary>
 public partial class SettingsForm : Form
 {
-    #region Fields
-
-    /// <summary>
-    /// A random number generator used to create random colors
-    /// </summary>
-    private Random random;
-
-    #endregion
-
     #region Constructor
 
     /// <summary>
@@ -32,9 +23,6 @@ public partial class SettingsForm : Form
 
         // Required method for designer support
         this.InitializeComponent();
-
-        // Initialize the random number generator used to create random colors
-        this.random = new Random();
 
         // Add frame border styles
         foreach (FormBorderStyle style in Enum.GetValues<FormBorderStyle>())
@@ -391,7 +379,7 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void OnColorRandomClicked(object? sender, EventArgs e)
     {
-        this._colorValueLabel.BackColor = Color.FromArgb(random.Next(256), random.Next(256), random.Next(256));
+        _colorValueLabel.BackColor = Utils.RandomColor();
     }
 
     /// <summary>

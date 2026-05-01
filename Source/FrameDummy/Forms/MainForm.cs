@@ -17,6 +17,9 @@ namespace FrameDummy;
 /// </summary>
 public class MainForm : Form
 {
+    /// <summary>The single live MainForm instance, set in the constructor so SettingsForm and other code in the assembly can reach it without a constructor-injected reference (v2 pattern).</summary>
+    internal static MainForm TheMainForm { get; private set; } = null!;
+
     /// <summary>The currently active settings. Replaced via with-expression on every change.</summary>
     Settings _settings = new();
 
@@ -32,9 +35,10 @@ public class MainForm : Form
     /// <summary>The settings dialog. Lazily created on first toggle; hidden (not closed) on user close.</summary>
     SettingsForm? _settingsForm;
 
-    /// <summary>Initializes the main form: builds layout, extracts the default icon from the .exe.</summary>
+    /// <summary>Initializes the main form: assigns the static singleton, builds layout, extracts the default icon from the .exe.</summary>
     public MainForm()
     {
+        TheMainForm = this;
         BuildLayout();
     }
 
