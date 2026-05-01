@@ -55,7 +55,7 @@ public partial class SettingsForm : Form
 
         this.imageSizingComboBox.SelectedIndex = 3;
 
-        this.titleTextBox.Text = Properties.Resources.StringDefaultTitle;
+        this.titleTextBox.Text = Strings.DefaultTitle;
         this.versionLabel.Text = string.Format(CultureInfo.CurrentCulture, this.versionLabel.Text, Application.ProductVersion);
         string year = Math.Max(DateTime.Today.Year, 2015).ToString();
         this.copyrightLabel.Text = string.Format(CultureInfo.CurrentCulture, this.copyrightLabel.Text, year);
@@ -79,7 +79,7 @@ public partial class SettingsForm : Form
     /// </summary>
     public void LoadLayout()
     {
-        VerySimpleIni iniFile = new VerySimpleIni(Properties.Resources.StringIniFileName, Application.ExecutablePath, Application.CompanyName, Application.ProductName, false);
+        VerySimpleIni iniFile = new VerySimpleIni(AppSettings.IniFileName, Application.ExecutablePath, Application.CompanyName, Application.ProductName, false);
 
         if (iniFile.Load())
         {
@@ -104,7 +104,7 @@ public partial class SettingsForm : Form
 
             FromString.IfRectangle(iniFile.GetValue(MainForm.TheMainForm.Name), value => { MainForm.TheMainForm.Bounds = value; }, null);
             FromString.IfBool(
-                iniFile.GetValue(Properties.Resources.StringIniMaximized),
+                iniFile.GetValue(AppSettings.MaximizedKey),
                 value =>
                 {
                     if (value)
@@ -121,7 +121,7 @@ public partial class SettingsForm : Form
     /// </summary>
     public void SaveLayout()
     {
-        VerySimpleIni iniFile = new VerySimpleIni(Properties.Resources.StringIniFileName, Application.ExecutablePath, Application.CompanyName, Application.ProductName, true);
+        VerySimpleIni iniFile = new VerySimpleIni(AppSettings.IniFileName, Application.ExecutablePath, Application.CompanyName, Application.ProductName, true);
 
         if (iniFile.IsReady)
         {
@@ -146,7 +146,7 @@ public partial class SettingsForm : Form
 
             Rectangle bounds = MainForm.TheMainForm.WindowState == FormWindowState.Normal ? MainForm.TheMainForm.Bounds : MainForm.TheMainForm.RestoreBounds;
             iniFile.SetValue(MainForm.TheMainForm.Name, new RectangleConverter().ConvertToInvariantString(bounds));
-            iniFile.SetValue(Properties.Resources.StringIniMaximized, MainForm.TheMainForm.WindowState == FormWindowState.Maximized);
+            iniFile.SetValue(AppSettings.MaximizedKey, MainForm.TheMainForm.WindowState == FormWindowState.Maximized);
 
             try
             {
@@ -246,7 +246,7 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void EventIconDefaultButtonClick(object sender, EventArgs e)
     {
-        this.iconTextBox.Text = Properties.Resources.StringDefaultIcon;
+        this.iconTextBox.Text = Strings.DefaultIcon;
         MainForm.TheMainForm.RestoreIcon();
     }
 
@@ -346,7 +346,7 @@ public partial class SettingsForm : Form
     private void EventImageClearButtonClick(object sender, EventArgs e)
     {
         MainForm.TheMainForm.SetImage(null);
-        this.imageTextBox.Text = Properties.Resources.StringNoImage;
+        this.imageTextBox.Text = Strings.NoImage;
         GC.Collect();
     }
 
@@ -445,7 +445,7 @@ public partial class SettingsForm : Form
     /// <param name="iconFilePath">The icon file path.</param>
     private void DoLoadIcon(string iconFilePath)
     {
-        if (!(string.IsNullOrEmpty(iconFilePath) || iconFilePath.Equals(Properties.Resources.StringDefaultIcon)))
+        if (!(string.IsNullOrEmpty(iconFilePath) || iconFilePath.Equals(Strings.DefaultIcon)))
         {
             if (MainForm.TheMainForm.LoadIcon(iconFilePath))
             {
@@ -460,7 +460,7 @@ public partial class SettingsForm : Form
     /// <param name="imageFilePath">The image file path.</param>
     private void DoLoadImage(string imageFilePath)
     {
-        if (!(string.IsNullOrEmpty(imageFilePath) || imageFilePath.Equals(Properties.Resources.StringNoImage) || imageFilePath.Equals(Properties.Resources.StringPastedImage)))
+        if (!(string.IsNullOrEmpty(imageFilePath) || imageFilePath.Equals(Strings.NoImage) || imageFilePath.Equals(Strings.PastedImage)))
         {
             if (MainForm.TheMainForm.LoadImage(imageFilePath))
             {

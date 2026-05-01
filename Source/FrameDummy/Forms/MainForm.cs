@@ -34,15 +34,15 @@ public partial class MainForm : Form
     public MainForm()
     {
         // Set the form's font to the default operating system font (Segoe UI on Vista)
-        this.Font = SystemFonts.MessageBoxFont;
+        Font = SystemFonts.MessageBoxFont;
 
         // Required method for designer support
-        this.InitializeComponent();
+        InitializeComponent();
 
         MainForm.TheMainForm = this;
-        this.Text = Properties.Resources.StringDefaultTitle;
-        this.settingsForm = new SettingsForm();
-        this.defaultIcon = this.Icon;
+        Text = Strings.DefaultTitle;
+        settingsForm = new SettingsForm();
+        defaultIcon = Icon;
     }
 
     #endregion
@@ -85,7 +85,7 @@ public partial class MainForm : Form
         {
             MessageBox.Show(
                 this,
-                string.Format(CultureInfo.CurrentCulture, Properties.Resources.StringIconFileLoadError, iconFilePath),
+                string.Format(CultureInfo.CurrentCulture, Strings.IconLoadErrorFormat, iconFilePath),
                 Application.ProductName,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
@@ -99,7 +99,7 @@ public partial class MainForm : Form
     /// </summary>
     public void RestoreIcon()
     {
-        this.Icon = this.defaultIcon;
+        Icon = defaultIcon;
     }
 
     /// <summary>
@@ -109,7 +109,7 @@ public partial class MainForm : Form
     /// <param name="transparent">True if the color is transparent, false otherwise.</param>
     public void SetColor(Color color, bool transparent)
     {
-        this.BackColor = this.pictureBox.BackColor = color;
+        BackColor = pictureBox.BackColor = color;
         if (transparent)
         {
             MainForm.TheMainForm.TransparencyKey = color;
@@ -122,7 +122,7 @@ public partial class MainForm : Form
     /// <param name="image">The new background image.</param>
     public void SetImage(Image image)
     {
-        this.pictureBox.Image = image;
+        pictureBox.Image = image;
         GC.Collect();
     }
 
@@ -136,14 +136,14 @@ public partial class MainForm : Form
         try
         {
             Image image = Image.FromFile(imageFile);
-            this.SetImage(image);
+            SetImage(image);
             return true;
         }
         catch (OutOfMemoryException)
         {
             MessageBox.Show(
                 this,
-                string.Format(CultureInfo.CurrentCulture, Properties.Resources.StringImageFileLoadError, imageFile),
+                string.Format(CultureInfo.CurrentCulture, Strings.ImageLoadErrorFormat, imageFile),
                 Application.ProductName,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
@@ -152,7 +152,7 @@ public partial class MainForm : Form
         {
             MessageBox.Show(
                 this,
-                string.Format(CultureInfo.CurrentCulture, Properties.Resources.StringImageFileNotFoundError, imageFile),
+                string.Format(CultureInfo.CurrentCulture, Strings.ImageNotFoundErrorFormat, imageFile),
                 Application.ProductName,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
@@ -167,7 +167,7 @@ public partial class MainForm : Form
     /// <param name="sizeMode">A SizeMode value.</param>
     public void SetSizeMode(PictureBoxSizeMode sizeMode)
     {
-        this.pictureBox.SizeMode = sizeMode;
+        pictureBox.SizeMode = sizeMode;
     }
 
     /// <summary>
@@ -175,7 +175,7 @@ public partial class MainForm : Form
     /// </summary>
     public void DoAutoSize()
     {
-        this.ClientSize = this.pictureBox.PreferredSize;
+        ClientSize = pictureBox.PreferredSize;
     }
 
     #endregion
@@ -195,17 +195,17 @@ public partial class MainForm : Form
             switch (e.KeyCode)
             {
                 case Keys.S:
-                    if (!this.settingsForm.prankNoSettingsHotkeyCheckBox.Checked)
+                    if (!settingsForm.prankNoSettingsHotkeyCheckBox.Checked)
                     {
-                        this.ToggleSettings();
+                        ToggleSettings();
                     }
 
                     break;
                 case Keys.V:
-                    this.PasteImage();
+                    PasteImage();
                     break;
                 case Keys.A:
-                    this.DoAutoSize();
+                    DoAutoSize();
                     break;
             }
         }
@@ -222,7 +222,7 @@ public partial class MainForm : Form
         switch (e.Button)
         {
             case MouseButtons.Left:
-                string command = this.settingsForm.commandTextBox.Text;
+                string command = settingsForm.commandTextBox.Text;
                 if (!string.IsNullOrEmpty(command))
                 {
                     try
@@ -233,7 +233,7 @@ public partial class MainForm : Form
                     {
                         string message = string.Format(
                             CultureInfo.CurrentCulture,
-                            Properties.Resources.CommandError,
+                            Strings.CommandErrorFormat,
                             command,
                             ex.Message);
                         MessageBox.Show(
@@ -247,9 +247,9 @@ public partial class MainForm : Form
 
                 break;
             case MouseButtons.Right:
-                if (!this.settingsForm.prankNoSettingsRightClickCheckBox.Checked)
+                if (!settingsForm.prankNoSettingsRightClickCheckBox.Checked)
                 {
-                    this.ToggleSettings();
+                    ToggleSettings();
                 }
 
                 break;
@@ -276,9 +276,9 @@ public partial class MainForm : Form
         string[] fileItems = (string[])e.Data.GetData(DataFormats.FileDrop, false);
         if (fileItems.Length > 0)
         {
-            if (this.LoadImage(fileItems[0]))
+            if (LoadImage(fileItems[0]))
             {
-                this.settingsForm.UpdateImageFilePath(fileItems[0]);
+                settingsForm.UpdateImageFilePath(fileItems[0]);
             }
         }
     }
@@ -291,7 +291,7 @@ public partial class MainForm : Form
     /// <param name="e">Empty event data.</param>
     private void EventMainFormShown(object sender, EventArgs e)
     {
-        this.settingsForm.LoadLayout();
+        settingsForm.LoadLayout();
     }
 
     /// <summary>
@@ -302,7 +302,7 @@ public partial class MainForm : Form
     /// <param name="e">Form closing event data.</param>
     private void EventMainFormFormClosing(object sender, FormClosingEventArgs e)
     {
-        if (this.settingsForm.prankNoCloseCheckBox.Checked)
+        if (settingsForm.prankNoCloseCheckBox.Checked)
         {
             e.Cancel = true;
         }
@@ -316,7 +316,7 @@ public partial class MainForm : Form
     /// <param name="e">Form closed event data.</param>
     private void EventMainFormFormClosed(object sender, FormClosedEventArgs e)
     {
-        this.settingsForm.SaveLayout();
+        settingsForm.SaveLayout();
     }
 
     #endregion
@@ -328,13 +328,13 @@ public partial class MainForm : Form
     /// </summary>
     private void ToggleSettings()
     {
-        if (!this.settingsForm.Visible)
+        if (!settingsForm.Visible)
         {
-            this.settingsForm.Show(this);
+            settingsForm.Show(this);
         }
         else
         {
-            this.settingsForm.Hide();
+            settingsForm.Hide();
         }
     }
 
@@ -345,15 +345,15 @@ public partial class MainForm : Form
     {
         if (Clipboard.ContainsImage())
         {
-            this.SetImage(Clipboard.GetImage());
-            this.settingsForm.UpdateImageFilePath(Properties.Resources.StringPastedImage);
+            SetImage(Clipboard.GetImage());
+            settingsForm.UpdateImageFilePath(Strings.PastedImage);
         }
         else if (Clipboard.ContainsFileDropList())
         {
             string imageFile = Clipboard.GetFileDropList()[0];
-            if (this.LoadImage(imageFile))
+            if (LoadImage(imageFile))
             {
-                this.settingsForm.UpdateImageFilePath(imageFile);
+                settingsForm.UpdateImageFilePath(imageFile);
             }
         }
     }
