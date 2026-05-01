@@ -3,7 +3,9 @@
 
 using System.Diagnostics;
 using System.Globalization;
-using System.Runtime.InteropServices;
+
+using Windows.Win32;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace FrameDummy;
 
@@ -17,12 +19,12 @@ public partial class MainForm : Form
     /// <summary>
     /// The default frame icon.
     /// </summary>
-    private Icon defaultIcon;
+    private readonly Icon _defaultIcon;
 
     /// <summary>
     /// The settings form.
     /// </summary>
-    private SettingsForm settingsForm;
+    private readonly SettingsForm _settingsForm;
 
     #endregion
 
@@ -39,10 +41,10 @@ public partial class MainForm : Form
         // Required method for designer support
         InitializeComponent();
 
-        MainForm.TheMainForm = this;
+        TheMainForm = this;
         Text = AppStrings.DefaultTitle;
-        settingsForm = new SettingsForm();
-        defaultIcon = Icon;
+        _settingsForm = new SettingsForm();
+        _defaultIcon = Icon!;
     }
 
     #endregion
@@ -52,7 +54,7 @@ public partial class MainForm : Form
     /// <summary>
     /// Gets the main form.
     /// </summary>
-    internal static MainForm TheMainForm { get; private set; }
+    internal static MainForm TheMainForm { get; private set; } = null!;
 
     #endregion
 
@@ -69,14 +71,14 @@ public partial class MainForm : Form
         {
             if (Path.GetExtension(iconFilePath).Equals(".ICO", StringComparison.CurrentCultureIgnoreCase))
             {
-                MainForm.TheMainForm.Icon = new Icon(iconFilePath);
+                TheMainForm.Icon = new Icon(iconFilePath);
             }
             else
             {
                 Bitmap bitmap = (Bitmap)Image.FromFile(iconFilePath);
                 Icon newIcon = Icon.FromHandle(bitmap.GetHicon());
-                MainForm.TheMainForm.Icon = newIcon;
-                NativeMethods.DestroyIcon(newIcon.Handle);
+                TheMainForm.Icon = newIcon;
+                PInvoke.DestroyIcon((HICON)newIcon.Handle);
             }
 
             return true;
@@ -99,7 +101,7 @@ public partial class MainForm : Form
     /// </summary>
     public void RestoreIcon()
     {
-        Icon = defaultIcon;
+        Icon = _defaultIcon;
     }
 
     /// <summary>
@@ -112,7 +114,7 @@ public partial class MainForm : Form
         BackColor = pictureBox.BackColor = color;
         if (transparent)
         {
-            MainForm.TheMainForm.TransparencyKey = color;
+            TheMainForm.TransparencyKey = color;
         }
     }
 
@@ -120,7 +122,7 @@ public partial class MainForm : Form
     /// Sets a new image.
     /// </summary>
     /// <param name="image">The new background image.</param>
-    public void SetImage(Image image)
+    public void SetImage(Image? image)
     {
         pictureBox.Image = image;
         GC.Collect();
@@ -195,7 +197,7 @@ public partial class MainForm : Form
             switch (e.KeyCode)
             {
                 case Keys.S:
-                    if (!settingsForm.prankNoSettingsHotkeyCheckBox.Checked)
+                    if (!_settingsForm.prankNoSettingsHotkeyCheckBox.Checked)
                     {
                         ToggleSettings();
                     }
@@ -222,7 +224,7 @@ public partial class MainForm : Form
         switch (e.Button)
         {
             case MouseButtons.Left:
-                string command = settingsForm.commandTextBox.Text;
+                string command = _settingsForm.commandTextBox.Text;
                 if (!string.IsNullOrEmpty(command))
                 {
                     try
@@ -247,7 +249,7 @@ public partial class MainForm : Form
 
                 break;
             case MouseButtons.Right:
-                if (!settingsForm.prankNoSettingsRightClickCheckBox.Checked)
+                if (!_settingsForm.prankNoSettingsRightClickCheckBox.Checked)
                 {
                     ToggleSettings();
                 }
@@ -263,7 +265,7 @@ public partial class MainForm : Form
     /// <param name="e">Drag and drop event data.</param>
     private void EventMainFormDragEnter(object sender, DragEventArgs e)
     {
-        e.Effect = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.All : DragDropEffects.None;
+        e.Effect = e.Data!.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.All : DragDropEffects.None;
     }
 
     /// <summary>
@@ -273,12 +275,12 @@ public partial class MainForm : Form
     /// <param name="e">Drag and drop event data.</param>
     private void EventMainFormDragDrop(object sender, DragEventArgs e)
     {
-        string[] fileItems = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+        string[] fileItems = (string[])e.Data!.GetData(DataFormats.FileDrop, false)!;
         if (fileItems.Length > 0)
         {
             if (LoadImage(fileItems[0]))
             {
-                settingsForm.UpdateImageFilePath(fileItems[0]);
+                _settingsForm.UpdateImageFilePath(fileItems[0]);
             }
         }
     }
@@ -291,7 +293,7 @@ public partial class MainForm : Form
     /// <param name="e">Empty event data.</param>
     private void EventMainFormShown(object sender, EventArgs e)
     {
-        settingsForm.LoadLayout();
+        _settingsForm.LoadLayout();
     }
 
     /// <summary>
@@ -302,7 +304,7 @@ public partial class MainForm : Form
     /// <param name="e">Form closing event data.</param>
     private void EventMainFormFormClosing(object sender, FormClosingEventArgs e)
     {
-        if (settingsForm.prankNoCloseCheckBox.Checked)
+        if (_settingsForm.prankNoCloseCheckBox.Checked)
         {
             e.Cancel = true;
         }
@@ -316,7 +318,7 @@ public partial class MainForm : Form
     /// <param name="e">Form closed event data.</param>
     private void EventMainFormFormClosed(object sender, FormClosedEventArgs e)
     {
-        settingsForm.SaveLayout();
+        _settingsForm.SaveLayout();
     }
 
     #endregion
@@ -328,13 +330,13 @@ public partial class MainForm : Form
     /// </summary>
     private void ToggleSettings()
     {
-        if (!settingsForm.Visible)
+        if (!_settingsForm.Visible)
         {
-            settingsForm.Show(this);
+            _settingsForm.Show(this);
         }
         else
         {
-            settingsForm.Hide();
+            _settingsForm.Hide();
         }
     }
 
@@ -346,29 +348,16 @@ public partial class MainForm : Form
         if (Clipboard.ContainsImage())
         {
             SetImage(Clipboard.GetImage());
-            settingsForm.UpdateImageFilePath(AppStrings.PastedImage);
+            _settingsForm.UpdateImageFilePath(AppStrings.PastedImage);
         }
         else if (Clipboard.ContainsFileDropList())
         {
-            string imageFile = Clipboard.GetFileDropList()[0];
+            string imageFile = Clipboard.GetFileDropList()[0]!;
             if (LoadImage(imageFile))
             {
-                settingsForm.UpdateImageFilePath(imageFile);
+                _settingsForm.UpdateImageFilePath(imageFile);
             }
         }
-    }
-
-    #endregion
-
-    #region Native Methods
-
-    /// <summary>
-    /// Native methods signatures.
-    /// </summary>
-    private static class NativeMethods
-    {
-        [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = CharSet.Auto)]
-        public static extern bool DestroyIcon(IntPtr handle);
     }
 
     #endregion
