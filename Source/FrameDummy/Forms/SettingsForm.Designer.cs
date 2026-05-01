@@ -671,7 +671,7 @@
             this.copyrightLabel.Name = "copyrightLabel";
             this.copyrightLabel.Size = new System.Drawing.Size(368, 17);
             this.copyrightLabel.TabIndex = 2;
-            this.copyrightLabel.Text = "Copyright © 2013-{0} Tecdrop. All Rights Reserved.";
+            this.copyrightLabel.Text = "Copyright © 2013-{0} The Hello World Writer.";
             //
             // urlLinkLabel
             //
@@ -681,7 +681,7 @@
             this.urlLinkLabel.Size = new System.Drawing.Size(191, 17);
             this.urlLinkLabel.TabIndex = 3;
             this.urlLinkLabel.TabStop = true;
-            this.urlLinkLabel.Text = "https://www.tecdrop.com";
+            this.urlLinkLabel.Text = "https://www.thehelloworldwriter.com";
             this.urlLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.EventUrlLinkLabelLinkClicked);
             //
             // SettingsForm
