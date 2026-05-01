@@ -25,7 +25,7 @@ public class VerySimpleIni
     /// <param name="force">Force using this file even if it does not exist.</param>
     public VerySimpleIni(string fileName, bool force)
     {
-        this.FileName = force ? fileName : File.Exists(fileName) ? fileName : string.Empty;
+        FileName = force ? fileName : File.Exists(fileName) ? fileName : string.Empty;
     }
 
     /// <summary>
@@ -40,21 +40,21 @@ public class VerySimpleIni
     {
         // First check if we have an INI file in the directory where the program main executable
         // file is located (to support portable programs)
-        string portableIniFile = this.FileName = Path.Combine(Path.GetDirectoryName(executablePath), iniNameOnly);
+        string portableIniFile = FileName = Path.Combine(Path.GetDirectoryName(executablePath), iniNameOnly);
 
         // If no INI file is found, try the program data directory from the ApplicationData
         // special directory for the current roaming user
-        if (!File.Exists(this.FileName))
+        if (!File.Exists(FileName))
         {
-            this.FileName = Path.Combine(
+            FileName = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 companyName + @"\" + productName + @"\" + iniNameOnly);
 
             // If again no INI file is found, we must be in Run Directly Mode, so we will not load or
             // save any configuration, expect for the case in which forceForRunDirectly is set
-            if (!File.Exists(this.FileName))
+            if (!File.Exists(FileName))
             {
-                this.FileName = forceForRunDirectly ? portableIniFile : string.Empty;
+                FileName = forceForRunDirectly ? portableIniFile : string.Empty;
             }
         }
     }
@@ -71,7 +71,7 @@ public class VerySimpleIni
     {
         get
         {
-            return !string.IsNullOrEmpty(this.FileName);
+            return !string.IsNullOrEmpty(FileName);
         }
     }
 
@@ -81,13 +81,13 @@ public class VerySimpleIni
     /// <returns>True if at least one line was read from the INI file, false otherwise.</returns>
     public bool Load()
     {
-        if (this.IsReady)
+        if (IsReady)
         {
             // Read all the lines, trim off any white-space characters from each line and remove empty lines
-            this.lines = new List<string>(File.ReadAllLines(this.FileName));
-            this.lines.ConvertAll<string>(line => line.Trim());
-            this.lines.RemoveAll(line => { return string.IsNullOrEmpty(line); });
-            return (this.lines != null) && (this.lines.Count > 0);
+            lines = new List<string>(File.ReadAllLines(FileName));
+            lines.ConvertAll<string>(line => line.Trim());
+            lines.RemoveAll(line => { return string.IsNullOrEmpty(line); });
+            return (lines != null) && (lines.Count > 0);
         }
 
         return false;
@@ -101,16 +101,16 @@ public class VerySimpleIni
     /// <returns>The setting value.</returns>
     public string GetValue(string key, string defaultValue)
     {
-        if ((this.lines != null) && (this.lines.Count > 0))
+        if ((lines != null) && (lines.Count > 0))
         {
             // Find the line that starts with the specified key ("key=value")
-            int index = this.lines.FindIndex(line => { return line.StartsWith(key, true, null); });
+            int index = lines.FindIndex(line => { return line.StartsWith(key, true, null); });
             if (index >= 0)
             {
                 // If line is found, save a reference to it and remove it from the list, to ensure faster
                 // future key look-ups
-                string line = this.lines[index];
-                this.lines.RemoveAt(index);
+                string line = lines[index];
+                lines.RemoveAt(index);
 
                 // Split the line in the "name=value" format and return the "value" part
                 string[] lineParts = line.Split(VerySimpleIni.KeyValueSeparator, 2);
@@ -131,7 +131,7 @@ public class VerySimpleIni
     /// <returns>The setting value.</returns>
     public string GetValue(string key)
     {
-        return this.GetValue(key, string.Empty);
+        return GetValue(key, string.Empty);
     }
 
     /// <summary>
@@ -139,9 +139,9 @@ public class VerySimpleIni
     /// </summary>
     public void Clear()
     {
-        if (this.lines != null)
+        if (lines != null)
         {
-            this.lines.Clear();
+            lines.Clear();
         }
     }
 
@@ -152,12 +152,12 @@ public class VerySimpleIni
     /// <param name="value">The value of the setting.</param>
     public void SetValue(string key, string value)
     {
-        if (this.lines == null)
+        if (lines == null)
         {
-            this.lines = new List<string>();
+            lines = new List<string>();
         }
 
-        this.lines.Add(string.Concat(key, VerySimpleIni.KeyValueSeparator[0].ToString(), value));
+        lines.Add(string.Concat(key, VerySimpleIni.KeyValueSeparator[0].ToString(), value));
     }
 
     /// <summary>
@@ -167,7 +167,7 @@ public class VerySimpleIni
     /// <param name="value">The value of the setting.</param>
     public void SetValue(string key, object value)
     {
-        this.SetValue(key, value.ToString());
+        SetValue(key, value.ToString());
     }
 
     /// <summary>
@@ -176,9 +176,9 @@ public class VerySimpleIni
     /// <returns>True if the saving was successful, false otherwise.</returns>
     public bool Save()
     {
-        if ((this.lines != null) && (this.lines.Count > 0) && this.IsReady)
+        if ((lines != null) && (lines.Count > 0) && IsReady)
         {
-            File.WriteAllLines(this.FileName, this.lines.ToArray());
+            File.WriteAllLines(FileName, lines.ToArray());
             return true;
         }
 
