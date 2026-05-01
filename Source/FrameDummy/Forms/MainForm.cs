@@ -229,7 +229,7 @@ public partial class MainForm : Form
                 {
                     try
                     {
-                        Process.Start(command);
+                        Process.Start(new ProcessStartInfo(command) { UseShellExecute = true });
                     }
                     catch (Exception ex)
                     {

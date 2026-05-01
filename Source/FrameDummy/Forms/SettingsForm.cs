@@ -421,7 +421,7 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void EventUrlLinkLabelLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
     {
-        Process.Start(urlLinkLabel.Text);
+        Process.Start(new ProcessStartInfo(urlLinkLabel.Text) { UseShellExecute = true });
     }
 
     #endregion
