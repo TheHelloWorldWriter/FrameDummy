@@ -1,257 +1,489 @@
-// Copyright (c) 2013-2026 The Hello World Writer (https://www.thehelloworldwriter.com).
-// Licensed under the MIT License. See the LICENSE file in the project root for more information.
+﻿//----------------------------------------------------------------------------
+// <copyright company="Tecdrop" file="MainForm.cs" project="FrameDummy">
+//    Copyright (C) 2013-2025 Tecdrop. All rights reserved. https://www.tecdrop.com
+// </copyright>
+//
+// Description: The settings form.
+//
+//---------------------------------------------------------------------------
 
-using System.ComponentModel;
-using System.Diagnostics;
-
-namespace FrameDummy;
-
-/// <summary>
-/// Settings dialog: a tabbed modeless window that mirrors the current Settings record into UI controls
-/// and routes any user edit back to the owner via a constructor-injected Action callback. Layout lives
-/// in SettingsForm.Layout.cs; this file holds state, behavior, and event handlers.
-/// </summary>
-public partial class SettingsForm : Form
+namespace FrameDummy
 {
-    /// <summary>Current settings view shown by the dialog. Replaced on each user edit and on Refresh.</summary>
-    Settings _settings;
+    #region Uses
 
-    /// <summary>Callback invoked on any user-driven settings change. The owner (MainForm) applies the new record.</summary>
-    readonly Action<Settings> _onChanged;
+    using System;
+    using System.Diagnostics;
+    using System.Drawing;
+    using System.Globalization;
+    using System.IO;
+    using System.Windows.Forms;
+    using Tecdrop.Reuse.WinForms.Sys;
 
-    /// <summary>RNG used by the "Random" color button.</summary>
-    readonly Random _random = new();
+    #endregion
 
-    /// <summary>When true, control change events do not fire callbacks. Set during Populate to avoid event storms.</summary>
-    bool _suppressEvents;
-
-    /// <summary>Lazy file-open dialog for picking a custom icon.</summary>
-    OpenFileDialog? _openIconDialog;
-
-    /// <summary>Lazy file-open dialog for picking a custom image.</summary>
-    OpenFileDialog? _openImageDialog;
-
-    /// <summary>Lazy color-picker dialog.</summary>
-    ColorDialog? _colorDialog;
-
-    /// <summary>Raised when the user clicks the Autosize button. The owner sizes its frame to the loaded image.</summary>
-    public event EventHandler? AutoSizeRequested;
-
-    /// <summary>Constructs the dialog with an initial Settings snapshot and a callback for user edits.</summary>
-    public SettingsForm(Settings initial, Action<Settings> onChanged)
+    /// <summary>
+    /// The settings form.
+    /// </summary>
+    public partial class SettingsForm : Form
     {
-        _settings = initial;
-        _onChanged = onChanged;
-        BuildLayout();
-        Populate(initial);
-    }
+        #region Fields
 
-    /// <summary>Refreshes the dialog from a new Settings snapshot. Called by the owner after self-modifying (drag-drop, paste).</summary>
-    public void Refresh(Settings newSettings)
-    {
-        _settings = newSettings;
-        Populate(newSettings);
-    }
+        /// <summary>
+        /// A random number generator used to create random colors
+        /// </summary>
+        private Random random;
 
-    /// <summary>Fills every control from the given Settings record. Suppresses change events for the duration so no callback storm.</summary>
-    void Populate(Settings s)
-    {
-        _suppressEvents = true;
-        try
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// Initializes a new instance of the SettingsForm class
+        /// </summary>
+        public SettingsForm()
         {
-            _titleTextBox.Text = s.Title;
-            _iconTextBox.Text = string.IsNullOrEmpty(s.IconPath) ? Strings.DefaultIcon : s.IconPath;
-            _borderComboBox.SelectedItem = s.Border;
-            _opacityTrackBar.Value = Math.Clamp(s.Opacity, _opacityTrackBar.Minimum, _opacityTrackBar.Maximum);
-            _opacityLabel.Text = string.Format(Strings.LabelOpacityFormat, s.Opacity / 100.0);
-            _controlBoxCheck.Checked = s.ControlBox;
-            _showIconCheck.Checked = s.ShowIcon;
-            _minimizeBoxCheck.Checked = s.MinimizeBox;
-            _maximizeBoxCheck.Checked = s.MaximizeBox;
-            _showInTaskbarCheck.Checked = s.ShowInTaskbar;
-            _topmostCheck.Checked = s.TopMost;
+            // Set the form's font to the default operating system font (Segoe UI on Vista)
+            this.Font = SystemFonts.MessageBoxFont;
 
-            _imageTextBox.Text = string.IsNullOrEmpty(s.ImagePath) ? Strings.NoImage : s.ImagePath;
-            _imageSizingComboBox.SelectedItem = s.ImageSizing;
-            _colorValueLabel.BackColor = ColorTranslator.FromHtml(s.Color);
-            _colorTransparentCheck.Checked = s.ColorTransparent;
+            // Required method for designer support
+            this.InitializeComponent();
 
-            _commandTextBox.Text = s.PrankCommand;
-            _prankNoRightClickCheck.Checked = s.PrankNoSettingsRightClick;
-            _prankNoHotkeyCheck.Checked = s.PrankNoSettingsHotkey;
-            _prankNoCloseCheck.Checked = s.PrankNoClose;
+            // Initialize the random number generator used to create random colors
+            this.random = new Random();
+
+            // Add frame border styles
+            foreach (FormBorderStyle style in Enum.GetValues(typeof(FormBorderStyle)))
+            {
+                this.borderComboBox.Items.Add(style.ToString());
+            }
+
+            this.borderComboBox.SelectedIndex = 4;
+
+            // Add frame border styles
+            foreach (PictureBoxSizeMode sizeMode in Enum.GetValues(typeof(PictureBoxSizeMode)))
+            {
+                if (sizeMode != PictureBoxSizeMode.AutoSize)
+                {
+                    this.imageSizingComboBox.Items.Add(sizeMode.ToString());
+                }
+            }
+
+            this.imageSizingComboBox.SelectedIndex = 3;
+
+            this.titleTextBox.Text = Properties.Resources.StringDefaultTitle;
+            this.versionLabel.Text = string.Format(CultureInfo.CurrentCulture, this.versionLabel.Text, Application.ProductVersion);
+            string year = Math.Max(DateTime.Today.Year, 2015).ToString();
+            this.copyrightLabel.Text = string.Format(CultureInfo.CurrentCulture, this.copyrightLabel.Text, year);
         }
-        finally
+
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Updates the path of the image file.
+        /// </summary>
+        /// <param name="filePath">The image file name.</param>
+        public void UpdateImageFilePath(string filePath)
         {
-            _suppressEvents = false;
+            this.imageTextBox.Text = filePath;
         }
-    }
 
-    /// <summary>Applies a transform to the current settings and notifies the owner via the callback. No-op while events are suppressed.</summary>
-    void Apply(Func<Settings, Settings> transform)
-    {
-        if (_suppressEvents) return;
-        _settings = transform(_settings);
-        _onChanged(_settings);
-    }
-
-    /// <summary>Hides instead of closing on user-driven close so the dialog state persists across toggles.</summary>
-    protected override void OnFormClosing(FormClosingEventArgs e)
-    {
-        if (e.CloseReason == CloseReason.UserClosing)
+        /// <summary>
+        /// Loads the layout from the default configuration file.
+        /// </summary>
+        public void LoadLayout()
         {
-            Hide();
-            e.Cancel = true;
-        }
-        base.OnFormClosing(e);
-    }
+            VerySimpleIni iniFile = new VerySimpleIni(Properties.Resources.StringIniFileName, Application.ExecutablePath, Application.CompanyName, Application.ProductName, false);
 
-    /// <summary>Escape hides the dialog (same as the close button) so a single keystroke dismisses it.</summary>
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        if (e.KeyCode == Keys.Escape)
+            if (iniFile.Load())
+            {
+                this.titleTextBox.Text = iniFile.GetValue(this.titleTextBox.Name, this.titleTextBox.Text);
+                this.DoLoadIcon(iniFile.GetValue(this.iconTextBox.Name));
+                FromString.IfInt(iniFile.GetValue(this.borderComboBox.Name), value => { this.borderComboBox.SelectedIndex = value; }, null);
+                FromString.IfInt(iniFile.GetValue(this.opacityTrackBar.Name), value => { this.opacityTrackBar.Value = value; }, null);
+
+                FromString.IfBool(iniFile.GetValue(this.controlCheckBox.Name), value => { this.controlCheckBox.Checked = value; }, null);
+                FromString.IfBool(iniFile.GetValue(this.iconCheckBox.Name), value => { this.iconCheckBox.Checked = value; }, null);
+                FromString.IfBool(iniFile.GetValue(this.minimizeCheckBox.Name), value => { this.minimizeCheckBox.Checked = value; }, null);
+                FromString.IfBool(iniFile.GetValue(this.maximizeCheckBox.Name), value => { this.maximizeCheckBox.Checked = value; }, null);
+                FromString.IfBool(iniFile.GetValue(this.taskbarCheckBox.Name), value => { this.taskbarCheckBox.Checked = value; }, null);
+                FromString.IfBool(iniFile.GetValue(this.topmostCheckBox.Name), value => { this.topmostCheckBox.Checked = value; }, null);
+
+                this.commandTextBox.Text = iniFile.GetValue(this.commandTextBox.Name, string.Empty);
+
+                this.DoLoadImage(iniFile.GetValue(this.imageTextBox.Name));
+                FromString.IfInt(iniFile.GetValue(this.imageSizingComboBox.Name), value => { this.imageSizingComboBox.SelectedIndex = value; }, null);
+                FromString.IfHtmlColor(iniFile.GetValue(this.colorValueLabel.Name), value => { this.colorValueLabel.BackColor = value; }, null);
+                FromString.IfBool(iniFile.GetValue(this.colorTransparentCheckBox.Name), value => { this.colorTransparentCheckBox.Checked = value; }, null);
+
+                FromString.IfRectangle(iniFile.GetValue(MainForm.TheMainForm.Name), value => { MainForm.TheMainForm.Bounds = value; }, null);
+                FromString.IfBool(
+                    iniFile.GetValue(Properties.Resources.StringIniMaximized),
+                    value =>
+                    {
+                        if (value)
+                        {
+                            MainForm.TheMainForm.WindowState = FormWindowState.Maximized;
+                        }
+                    },
+                    null);
+            }
+        }
+
+        /// <summary>
+        /// Saves the layout to the default configuration file.
+        /// </summary>
+        public void SaveLayout()
         {
-            Hide();
-            e.SuppressKeyPress = true;
+            VerySimpleIni iniFile = new VerySimpleIni(Properties.Resources.StringIniFileName, Application.ExecutablePath, Application.CompanyName, Application.ProductName, true);
+
+            if (iniFile.IsReady)
+            {
+                iniFile.SetValue(this.titleTextBox.Name, this.titleTextBox.Text);
+                iniFile.SetValue(this.iconTextBox.Name, this.iconTextBox.Text);
+                iniFile.SetValue(this.borderComboBox.Name, this.borderComboBox.SelectedIndex);
+                iniFile.SetValue(this.opacityTrackBar.Name, this.opacityTrackBar.Value);
+
+                iniFile.SetValue(this.controlCheckBox.Name, this.controlCheckBox.Checked);
+                iniFile.SetValue(this.iconCheckBox.Name, this.iconCheckBox.Checked);
+                iniFile.SetValue(this.minimizeCheckBox.Name, this.minimizeCheckBox.Checked);
+                iniFile.SetValue(this.maximizeCheckBox.Name, this.maximizeCheckBox.Checked);
+                iniFile.SetValue(this.taskbarCheckBox.Name, this.taskbarCheckBox.Checked);
+                iniFile.SetValue(this.topmostCheckBox.Name, this.topmostCheckBox.Checked);
+
+                iniFile.SetValue(this.commandTextBox.Name, this.commandTextBox.Text);
+
+                iniFile.SetValue(this.imageTextBox.Name, this.imageTextBox.Text);
+                iniFile.SetValue(this.imageSizingComboBox.Name, this.imageSizingComboBox.SelectedIndex);
+                iniFile.SetValue(this.colorValueLabel.Name, ColorTranslator.ToHtml(this.colorValueLabel.BackColor));
+                iniFile.SetValue(this.colorTransparentCheckBox.Name, this.colorTransparentCheckBox.Checked);
+
+                Rectangle bounds = MainForm.TheMainForm.WindowState == FormWindowState.Normal ? MainForm.TheMainForm.Bounds : MainForm.TheMainForm.RestoreBounds;
+                iniFile.SetValue(MainForm.TheMainForm.Name, new RectangleConverter().ConvertToInvariantString(bounds));
+                iniFile.SetValue(Properties.Resources.StringIniMaximized, MainForm.TheMainForm.WindowState == FormWindowState.Maximized);
+
+                try
+                {
+                    iniFile.Save();
+                }
+                catch
+                {
+                    // Ignore configuration save errors
+                }
+            }
         }
-    }
 
-    /// <summary>Populates the About tab's dynamic version and copyright lines on first show.</summary>
-    protected override void OnShown(EventArgs e)
-    {
-        base.OnShown(e);
-        _aboutVersionLabel.Text = string.Format(Strings.AboutVersionFormat, Application.ProductVersion);
-        _aboutCopyrightLabel.Text = string.Format(Strings.AboutCopyrightFormat, DateTime.Today.Year);
-    }
+        #endregion
 
-    // Frame tab event handlers.
+        #region Events - Form
 
-    /// <summary>Title text changed: push the new title into the settings.</summary>
-    void OnTitleChanged(object? sender, EventArgs e) => Apply(s => s with { Title = _titleTextBox.Text });
-
-    /// <summary>Icon Browse clicked: open a file dialog and (on OK) push the chosen path into the settings.</summary>
-    void OnIconBrowseClicked(object? sender, EventArgs e)
-    {
-        _openIconDialog ??= new OpenFileDialog { Title = Strings.IconDialogTitle, Filter = Strings.IconDialogFilter };
-        var startDir = string.IsNullOrEmpty(_settings.IconPath) ? null : Path.GetDirectoryName(_settings.IconPath);
-        if (!string.IsNullOrEmpty(startDir)) _openIconDialog.InitialDirectory = startDir;
-        if (_openIconDialog.ShowDialog(this) == DialogResult.OK)
-            Apply(s => s with { IconPath = _openIconDialog.FileName });
-    }
-
-    /// <summary>Icon Default clicked: clear the IconPath so the owner restores the application's default icon.</summary>
-    void OnIconDefaultClicked(object? sender, EventArgs e) => Apply(s => s with { IconPath = string.Empty });
-
-    /// <summary>Border style changed: push the new enum value into the settings.</summary>
-    void OnBorderChanged(object? sender, EventArgs e)
-    {
-        if (_borderComboBox.SelectedItem is FormBorderStyle border) Apply(s => s with { Border = border });
-    }
-
-    /// <summary>Opacity slider changed: update the formatted label and push the new percentage into the settings.</summary>
-    void OnOpacityChanged(object? sender, EventArgs e)
-    {
-        var value = _opacityTrackBar.Value;
-        _opacityLabel.Text = string.Format(Strings.LabelOpacityFormat, value / 100.0);
-        Apply(s => s with { Opacity = value });
-    }
-
-    /// <summary>Control Box checkbox changed.</summary>
-    void OnControlBoxChanged(object? sender, EventArgs e) => Apply(s => s with { ControlBox = _controlBoxCheck.Checked });
-
-    /// <summary>Show Icon checkbox changed.</summary>
-    void OnShowIconChanged(object? sender, EventArgs e) => Apply(s => s with { ShowIcon = _showIconCheck.Checked });
-
-    /// <summary>Minimize Box checkbox changed.</summary>
-    void OnMinimizeBoxChanged(object? sender, EventArgs e) => Apply(s => s with { MinimizeBox = _minimizeBoxCheck.Checked });
-
-    /// <summary>Maximize Box checkbox changed.</summary>
-    void OnMaximizeBoxChanged(object? sender, EventArgs e) => Apply(s => s with { MaximizeBox = _maximizeBoxCheck.Checked });
-
-    /// <summary>Show In Taskbar checkbox changed.</summary>
-    void OnShowInTaskbarChanged(object? sender, EventArgs e) => Apply(s => s with { ShowInTaskbar = _showInTaskbarCheck.Checked });
-
-    /// <summary>Topmost checkbox changed.</summary>
-    void OnTopmostChanged(object? sender, EventArgs e) => Apply(s => s with { TopMost = _topmostCheck.Checked });
-
-    // Content tab event handlers.
-
-    /// <summary>Image Browse clicked: open a file dialog and (on OK) push the chosen path into the settings.</summary>
-    void OnImageBrowseClicked(object? sender, EventArgs e)
-    {
-        _openImageDialog ??= new OpenFileDialog { Title = Strings.ImageDialogTitle, Filter = Strings.ImageDialogFilter };
-        var startDir = string.IsNullOrEmpty(_settings.ImagePath) || _settings.ImagePath == Strings.PastedImage
-            ? null
-            : Path.GetDirectoryName(_settings.ImagePath);
-        if (!string.IsNullOrEmpty(startDir)) _openImageDialog.InitialDirectory = startDir;
-        if (_openImageDialog.ShowDialog(this) == DialogResult.OK)
-            Apply(s => s with { ImagePath = _openImageDialog.FileName });
-    }
-
-    /// <summary>Image Clear clicked: clear ImagePath so the owner removes the current image.</summary>
-    void OnImageClearClicked(object? sender, EventArgs e) => Apply(s => s with { ImagePath = string.Empty });
-
-    /// <summary>Image Sizing combo changed.</summary>
-    void OnImageSizingChanged(object? sender, EventArgs e)
-    {
-        if (_imageSizingComboBox.SelectedItem is PictureBoxSizeMode mode) Apply(s => s with { ImageSizing = mode });
-    }
-
-    /// <summary>Autosize button clicked: raises AutoSizeRequested so the owner can size its frame to the current image.</summary>
-    void OnAutoSizeClicked(object? sender, EventArgs e) => AutoSizeRequested?.Invoke(this, EventArgs.Empty);
-
-    /// <summary>Color value label background changed (after Browse or Random updated it): push the new color into the settings.</summary>
-    void OnColorValueChanged(object? sender, EventArgs e)
-    {
-        Apply(s => s with { Color = ColorTranslator.ToHtml(_colorValueLabel.BackColor) });
-    }
-
-    /// <summary>Color Browse clicked: open a color picker initialized to the current color and (on OK) update the value label, which fires OnColorValueChanged.</summary>
-    void OnColorBrowseClicked(object? sender, EventArgs e)
-    {
-        _colorDialog ??= new ColorDialog();
-        _colorDialog.Color = _colorValueLabel.BackColor;
-        if (_colorDialog.ShowDialog(this) == DialogResult.OK)
-            _colorValueLabel.BackColor = _colorDialog.Color;
-    }
-
-    /// <summary>Color Random clicked: pick a random RGB color and assign to the value label, which fires OnColorValueChanged.</summary>
-    void OnColorRandomClicked(object? sender, EventArgs e)
-    {
-        _colorValueLabel.BackColor = Color.FromArgb(_random.Next(256), _random.Next(256), _random.Next(256));
-    }
-
-    /// <summary>Color transparency checkbox changed.</summary>
-    void OnColorTransparentChanged(object? sender, EventArgs e) => Apply(s => s with { ColorTransparent = _colorTransparentCheck.Checked });
-
-    // Prank tab event handlers.
-
-    /// <summary>Prank command text changed.</summary>
-    void OnCommandChanged(object? sender, EventArgs e) => Apply(s => s with { PrankCommand = _commandTextBox.Text });
-
-    /// <summary>"Don't show Settings on right-click" prank checkbox changed.</summary>
-    void OnPrankNoRightClickChanged(object? sender, EventArgs e) => Apply(s => s with { PrankNoSettingsRightClick = _prankNoRightClickCheck.Checked });
-
-    /// <summary>"Don't show Settings on Ctrl+S" prank checkbox changed.</summary>
-    void OnPrankNoHotkeyChanged(object? sender, EventArgs e) => Apply(s => s with { PrankNoSettingsHotkey = _prankNoHotkeyCheck.Checked });
-
-    /// <summary>"Don't allow close" prank checkbox changed.</summary>
-    void OnPrankNoCloseChanged(object? sender, EventArgs e) => Apply(s => s with { PrankNoClose = _prankNoCloseCheck.Checked });
-
-    // About tab event handlers.
-
-    /// <summary>About URL clicked: launch the link in the user's default browser via the shell.</summary>
-    void OnAboutUrlClicked(object? sender, LinkLabelLinkClickedEventArgs e)
-    {
-        try
+        /// <summary>
+        /// Event -> Form - Form Shown
+        /// Initializes control values and sets the position of the form, when the settings form is first shown.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Keyboard event data.</param>
+        private void EventSettingsFormShown(object sender, EventArgs e)
         {
-            // UseShellExecute = true is required on .NET Core+/.NET 5+ to launch URLs.
-            Process.Start(new ProcessStartInfo(Strings.AboutUrl) { UseShellExecute = true });
+            /*Screen screen = Screen.FromControl(MainForm.TheMainForm);
+            this.Location = new Point(
+                Math.Min(screen.WorkingArea.Width - this.Width, MainForm.TheMainForm.Right + 4),
+                Math.Min(screen.WorkingArea.Height - this.Height, MainForm.TheMainForm.Top));*/
+            this.colorValueLabel.Height = this.colorBrowseButton.Height;
         }
-        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException or FileNotFoundException)
+
+        /// <summary>
+        /// Event -> Form - Form Key Down
+        /// Hides the form when the user presses the Escape key.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Keyboard event data.</param>
+        private void EventSettingsFormKeyDown(object sender, KeyEventArgs e)
         {
-            MessageBox.Show(this, string.Format(Strings.CommandErrorFormat, Strings.AboutUrl, ex.Message), Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (e.KeyCode == Keys.Escape)
+            {
+                this.Hide();
+                e.SuppressKeyPress = true;
+            }
         }
+
+        /// <summary>
+        /// Event -> Form - Form Closing
+        /// Hides the form instead of closing it.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Form closing event data.</param>
+        private void EventSettingsFormFormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                this.Hide();
+                e.Cancel = true;
+            }
+        }
+
+        #endregion
+
+        #region Events - Frame Settings
+
+        /// <summary>
+        /// Event -> Title Text Box - Text Changed
+        /// Updates the frame title text in real-time.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Empty event data.</param>
+        private void OnTitleChanged(object? sender, EventArgs e)
+        {
+            MainForm.TheMainForm.Text = this.titleTextBox.Text;
+        }
+
+        /// <summary>
+        /// Event -> Icon Browse Button -> Click
+        /// Opens a File Dialog and allows the user to select a new frame icon.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Empty event data.</param>
+        private void OnIconBrowseClicked(object? sender, EventArgs e)
+        {
+            this.openIconDialog.InitialDirectory = Path.GetDirectoryName(this.iconTextBox.Text);
+            if (this.openIconDialog.ShowDialog(this) == DialogResult.OK)
+            {
+                this.DoLoadIcon(this.openIconDialog.FileName);
+            }
+        }
+
+        /// <summary>
+        /// Event -> Icon Default Button -> Click
+        /// Restores the default frame icon.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Empty event data.</param>
+        private void OnIconDefaultClicked(object? sender, EventArgs e)
+        {
+            this.iconTextBox.Text = Properties.Resources.StringDefaultIcon;
+            MainForm.TheMainForm.RestoreIcon();
+        }
+
+        /// <summary>
+        /// Event -> Border Combo Box - Selected Index Changed
+        /// Updates the frame style in real-time.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Empty event data.</param>
+        private void OnBorderChanged(object? sender, EventArgs e)
+        {
+            MainForm.TheMainForm.FormBorderStyle = Enum.Parse<FormBorderStyle>(_borderComboBox.SelectedItem.ToString());
+        }
+
+        /// <summary>
+        /// Event -> Opacity Track Bar - Value Changed
+        /// Updates the opacity of the main frame form in real-time.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Empty event data.</param>
+        private void EventOpacityTrackBarValueChanged(object sender, EventArgs e)
+        {
+            MainForm.TheMainForm.Opacity = (double)this.opacityTrackBar.Value / 100;
+            this.opacityLabel.Text = string.Format(CultureInfo.CurrentCulture, "Opacity:\r\n{0:0%}", MainForm.TheMainForm.Opacity);
+        }
+
+        /// <summary>
+        /// Event -> Frame Check Boxes - Checked Changed
+        /// Updates frame options in real-time.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Empty event data.</param>
+        private void EventFrameCheckBoxesCheckedChanged(object sender, EventArgs e)
+        {
+            if (sender == this.controlCheckBox)
+            {
+                MainForm.TheMainForm.ControlBox = this.controlCheckBox.Checked;
+            }
+            else if (sender == this.iconCheckBox)
+            {
+                MainForm.TheMainForm.ShowIcon = this.iconCheckBox.Checked;
+            }
+            else if (sender == this.minimizeCheckBox)
+            {
+                MainForm.TheMainForm.MinimizeBox = this.minimizeCheckBox.Checked;
+            }
+            else if (sender == this.maximizeCheckBox)
+            {
+                MainForm.TheMainForm.MaximizeBox = this.maximizeCheckBox.Checked;
+            }
+            else if (sender == this.taskbarCheckBox)
+            {
+                MainForm.TheMainForm.ShowInTaskbar = this.taskbarCheckBox.Checked;
+            }
+            else if (sender == this.topmostCheckBox)
+            {
+                MainForm.TheMainForm.TopMost = this.topmostCheckBox.Checked;
+            }
+        }
+
+        /// <summary>
+        /// Event -> Command Text Box -> Text Changed
+        /// Updates the dummy form command.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Empty event data.</param>
+        private void EventCommandTextBoxTextChanged(object sender, EventArgs e)
+        {
+            MainForm.TheMainForm.Cursor = string.IsNullOrEmpty(this.commandTextBox.Text) ? Cursors.Default : Cursors.Hand;
+        }
+
+        #endregion
+
+        #region Events - Transparent or Image Mode Settings
+
+        /// <summary>
+        /// Event -> Image Browse Button -> Click
+        /// Opens a File Dialog and allows the user to select the image.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Empty event data.</param>
+        private void EventImageBrowseButtonClick(object sender, EventArgs e)
+        {
+            this.openImageDialog.InitialDirectory = Path.GetDirectoryName(this.imageTextBox.Text);
+            if (this.openImageDialog.ShowDialog(this) == DialogResult.OK)
+            {
+                this.DoLoadImage(this.openImageDialog.FileName);
+            }
+        }
+
+        /// <summary>
+        /// Event -> Image Clear Button -> Click
+        /// Clears the current image.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Empty event data.</param>
+        private void OnImageClearClicked(object? sender, EventArgs e)
+        {
+            MainForm.TheMainForm.SetImage(null);
+            _imageTextBox.Text = Strings.NoImage;
+            GC.Collect();
+        }
+
+        /// <summary>
+        /// Event -> Image Size Mode Combo Box -> SelectedIndexChanged
+        /// Sets a new picture size mode to the main form image.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Empty event data.</param>
+        private void EventImageSizingComboBoxSelectedIndexChanged(object sender, EventArgs e)
+        {
+            MainForm.TheMainForm.SetSizeMode((PictureBoxSizeMode)Enum.Parse(typeof(PictureBoxSizeMode), this.imageSizingComboBox.SelectedItem.ToString()));
+        }
+
+        /// <summary>
+        /// Event -> Auto Size button -> Click
+        /// Auto sizes the frame form based on the size of the image.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Empty event data.</param>
+        private void EventAutoSizeButtonClick(object sender, EventArgs e)
+        {
+            MainForm.TheMainForm.DoAutoSize();
+        }
+
+        /// <summary>
+        /// Event -> Color Value Label -> BackColor Changed
+        /// Updates the background color of the main frame form when the background color is changed in Settings.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Empty event data.</param>
+        private void EventColorValueLabelBackColorChanged(object sender, EventArgs e)
+        {
+            MainForm.TheMainForm.SetColor(this.colorValueLabel.BackColor, this.colorTransparentCheckBox.Checked);
+        }
+
+        /// <summary>
+        /// Event -> Color Random Button -> Click
+        /// Sets the main form picture box background color to a new random color.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Empty event data.</param>
+        private void EventColorRandomButtonClick(object sender, EventArgs e)
+        {
+            this.colorValueLabel.BackColor = Color.FromArgb(this.random.Next(256), this.random.Next(256), this.random.Next(256));
+        }
+
+        /// <summary>
+        /// Event -> Color Browse Button -> Click
+        /// Opens a Color Dialog Box and allows the user to select a new color.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Empty event data.</param>
+        private void EventColorBrowseButtonClick(object sender, EventArgs e)
+        {
+            this.colorDialog.Color = this.colorValueLabel.BackColor;
+            if (this.colorDialog.ShowDialog(this) == DialogResult.OK)
+            {
+                this.colorValueLabel.BackColor = this.colorDialog.Color;
+            }
+        }
+
+        /// <summary>
+        /// Event -> Color Transparent Check Box -> Check Changed
+        /// Enables or disables the color transparency of the main frame form.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Empty event data.</param>
+        private void EventColorTransparentCheckBoxCheckedChanged(object sender, EventArgs e)
+        {
+            MainForm.TheMainForm.TransparencyKey = this.colorTransparentCheckBox.Checked ? this.colorValueLabel.BackColor : Color.Empty;
+        }
+
+        #endregion
+
+        #region Events - About
+
+        /// <summary>
+        /// Event -> Url Link Label -> Link Clicked
+        /// Open the developer home page.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">Empty event data.</param>
+        private void EventUrlLinkLabelLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start(this.urlLinkLabel.Text);
+        }
+
+        #endregion
+
+        #region Icon and Image Settings Functionality
+
+        /// <summary>
+        /// Loads a new icon.
+        /// </summary>
+        /// <param name="iconFilePath">The icon file path.</param>
+        private void DoLoadIcon(string iconFilePath)
+        {
+            if (!(string.IsNullOrEmpty(iconFilePath) || iconFilePath.Equals(Properties.Resources.StringDefaultIcon)))
+            {
+                if (MainForm.TheMainForm.LoadIcon(iconFilePath))
+                {
+                    this.iconTextBox.Text = iconFilePath;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Loads a new image.
+        /// </summary>
+        /// <param name="imageFilePath">The image file path.</param>
+        private void DoLoadImage(string imageFilePath)
+        {
+            if (!(string.IsNullOrEmpty(imageFilePath) || imageFilePath.Equals(Properties.Resources.StringNoImage) || imageFilePath.Equals(Properties.Resources.StringPastedImage)))
+            {
+                if (MainForm.TheMainForm.LoadImage(imageFilePath))
+                {
+                    this.imageTextBox.Text = imageFilePath;
+                }
+            }
+        }
+
+        #endregion
     }
 }
