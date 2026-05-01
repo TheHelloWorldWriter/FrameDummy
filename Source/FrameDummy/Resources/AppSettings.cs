@@ -4,12 +4,18 @@
 namespace FrameDummy;
 
 /// <summary>
-/// User-facing strings, centralized in one place. Keeps string literals out of UI files
-/// and makes future localization a matter of swapping this class.
+/// App settings, such as INI file keys and file names. Keeps these values out of the main code and
+/// makes it easier to change them in the future if needed.
 /// </summary>
 public static class AppSettings
 {
+    /// <summary>
+    /// The INI settings file name. The runtime resolves the actual path.
+    /// </summary>
     public const string IniFileName = "framedummy.ini";
 
+    /// <summary>
+    /// The key used to store the window's maximized state in the INI file.
+    /// </summary>
     public const string MaximizedKey = "maximized";
 }
