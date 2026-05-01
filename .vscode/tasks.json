@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "publish: framework-dependent (small)",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "publish",
+        "Source/FrameDummy.slnx",
+        "-p:PublishProfile=win-x64-fd"
+      ],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "publish: self-contained (big)",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "publish",
+        "Source/FrameDummy.slnx",
+        "-p:PublishProfile=win-x64-sc"
+      ],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}
