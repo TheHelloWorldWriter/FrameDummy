@@ -23,7 +23,7 @@
     <Company>The Hello World Writer</Company>
     <Product>FrameDummy</Product>
     <Description>Fake desktop window frame around any image or screen area. For photo frames, messages, software-design mockups, or pranks.</Description>
-    <Copyright>Copyright © 2013-2026 The Hello World Writer.</Copyright>
+    <Copyright>Copyright © 2013-present The Hello World Writer.</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

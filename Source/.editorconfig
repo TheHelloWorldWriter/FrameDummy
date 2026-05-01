@@ -3,7 +3,7 @@ indent_size = 4
 max_line_length = 120
 
 # License header
-file_header_template = Copyright (c) 2013-2026 The Hello World Writer (https://www.thehelloworldwriter.com).\nLicensed under the MIT License. See the LICENSE file in the project root for more information.
+file_header_template = Copyright (c) 2013-present The Hello World Writer (https://www.thehelloworldwriter.com).\nLicensed under the MIT License. See the LICENSE file in the project root for more information.
 dotnet_diagnostic.IDE0073.severity = error
 
 # IDE0130: Namespace does not match folder structure - we use a flat `FrameDummy` namespace; folders organize the file tree only.
