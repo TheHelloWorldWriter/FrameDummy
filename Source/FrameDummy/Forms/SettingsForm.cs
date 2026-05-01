@@ -282,7 +282,7 @@ namespace FrameDummy
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">Empty event data.</param>
-        private void EventOpacityTrackBarValueChanged(object sender, EventArgs e)
+        private void OnOpacityChanged(object? sender, EventArgs e)
         {
             MainForm.TheMainForm.Opacity = (double)this.opacityTrackBar.Value / 100;
             this.opacityLabel.Text = string.Format(CultureInfo.CurrentCulture, "Opacity:\r\n{0:0%}", MainForm.TheMainForm.Opacity);
@@ -294,7 +294,7 @@ namespace FrameDummy
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">Empty event data.</param>
-        private void EventFrameCheckBoxesCheckedChanged(object sender, EventArgs e)
+        private void OnFrameCheckChanged(object? sender, EventArgs e)
         {
             if (sender == this.controlCheckBox)
             {
@@ -328,7 +328,7 @@ namespace FrameDummy
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">Empty event data.</param>
-        private void EventCommandTextBoxTextChanged(object sender, EventArgs e)
+        private void OnCommandChanged(object? sender, EventArgs e)
         {
             MainForm.TheMainForm.Cursor = string.IsNullOrEmpty(this.commandTextBox.Text) ? Cursors.Default : Cursors.Hand;
         }
@@ -343,7 +343,7 @@ namespace FrameDummy
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">Empty event data.</param>
-        private void EventImageBrowseButtonClick(object sender, EventArgs e)
+        private void OnImageBrowseClicked(object? sender, EventArgs e)
         {
             this.openImageDialog.InitialDirectory = Path.GetDirectoryName(this.imageTextBox.Text);
             if (this.openImageDialog.ShowDialog(this) == DialogResult.OK)
@@ -371,7 +371,7 @@ namespace FrameDummy
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">Empty event data.</param>
-        private void EventImageSizingComboBoxSelectedIndexChanged(object sender, EventArgs e)
+        private void OnImageSizingChanged(object? sender, EventArgs e)
         {
             MainForm.TheMainForm.SetSizeMode((PictureBoxSizeMode)Enum.Parse(typeof(PictureBoxSizeMode), this.imageSizingComboBox.SelectedItem.ToString()));
         }
@@ -382,7 +382,7 @@ namespace FrameDummy
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">Empty event data.</param>
-        private void EventAutoSizeButtonClick(object sender, EventArgs e)
+        private void OnAutoSizeClicked(object? sender, EventArgs e)
         {
             MainForm.TheMainForm.DoAutoSize();
         }
@@ -393,7 +393,7 @@ namespace FrameDummy
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">Empty event data.</param>
-        private void EventColorValueLabelBackColorChanged(object sender, EventArgs e)
+        private void OnColorValueChanged(object? sender, EventArgs e)
         {
             MainForm.TheMainForm.SetColor(this.colorValueLabel.BackColor, this.colorTransparentCheckBox.Checked);
         }
@@ -404,7 +404,7 @@ namespace FrameDummy
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">Empty event data.</param>
-        private void EventColorRandomButtonClick(object sender, EventArgs e)
+        private void OnColorRandomClicked(object? sender, EventArgs e)
         {
             this.colorValueLabel.BackColor = Color.FromArgb(this.random.Next(256), this.random.Next(256), this.random.Next(256));
         }
@@ -415,7 +415,7 @@ namespace FrameDummy
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">Empty event data.</param>
-        private void EventColorBrowseButtonClick(object sender, EventArgs e)
+        private void OnColorBrowseClicked(object? sender, EventArgs e)
         {
             this.colorDialog.Color = this.colorValueLabel.BackColor;
             if (this.colorDialog.ShowDialog(this) == DialogResult.OK)
@@ -430,7 +430,7 @@ namespace FrameDummy
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">Empty event data.</param>
-        private void EventColorTransparentCheckBoxCheckedChanged(object sender, EventArgs e)
+        private void OnColorTransparentChanged(object? sender, EventArgs e)
         {
             MainForm.TheMainForm.TransparencyKey = this.colorTransparentCheckBox.Checked ? this.colorValueLabel.BackColor : Color.Empty;
         }
@@ -445,7 +445,7 @@ namespace FrameDummy
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">Empty event data.</param>
-        private void EventUrlLinkLabelLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void OnAboutUrlClicked(object? sender, LinkLabelLinkClickedEventArgs e)
         {
             Process.Start(this.urlLinkLabel.Text);
         }

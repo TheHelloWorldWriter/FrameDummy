@@ -293,42 +293,42 @@ public partial class SettingsForm
         _controlBoxCheck.MinimumSize = new Size(160, 0);
         _controlBoxCheck.Text = Strings.CheckControlBox;
         _controlBoxCheck.UseVisualStyleBackColor = true;
-        _controlBoxCheck.CheckedChanged += OnControlBoxChanged;
+        _controlBoxCheck.CheckedChanged += OnFrameCheckChanged;
 
         // _showIconCheck
         _showIconCheck.AutoSize = true;
         _showIconCheck.MinimumSize = new Size(160, 0);
         _showIconCheck.Text = Strings.CheckShowIcon;
         _showIconCheck.UseVisualStyleBackColor = true;
-        _showIconCheck.CheckedChanged += OnShowIconChanged;
+        _showIconCheck.CheckedChanged += OnFrameCheckChanged;
 
         // _minimizeBoxCheck
         _minimizeBoxCheck.AutoSize = true;
         _minimizeBoxCheck.MinimumSize = new Size(160, 0);
         _minimizeBoxCheck.Text = Strings.CheckMinimizeBox;
         _minimizeBoxCheck.UseVisualStyleBackColor = true;
-        _minimizeBoxCheck.CheckedChanged += OnMinimizeBoxChanged;
+        _minimizeBoxCheck.CheckedChanged += OnFrameCheckChanged;
 
         // _maximizeBoxCheck
         _maximizeBoxCheck.AutoSize = true;
         _maximizeBoxCheck.MinimumSize = new Size(160, 0);
         _maximizeBoxCheck.Text = Strings.CheckMaximizeBox;
         _maximizeBoxCheck.UseVisualStyleBackColor = true;
-        _maximizeBoxCheck.CheckedChanged += OnMaximizeBoxChanged;
+        _maximizeBoxCheck.CheckedChanged += OnFrameCheckChanged;
 
         // _showInTaskbarCheck
         _showInTaskbarCheck.AutoSize = true;
         _showInTaskbarCheck.MinimumSize = new Size(160, 0);
         _showInTaskbarCheck.Text = Strings.CheckShowInTaskbar;
         _showInTaskbarCheck.UseVisualStyleBackColor = true;
-        _showInTaskbarCheck.CheckedChanged += OnShowInTaskbarChanged;
+        _showInTaskbarCheck.CheckedChanged += OnFrameCheckChanged;
 
         // _topmostCheck
         _topmostCheck.AutoSize = true;
         _topmostCheck.MinimumSize = new Size(160, 0);
         _topmostCheck.Text = Strings.CheckTopmost;
         _topmostCheck.UseVisualStyleBackColor = true;
-        _topmostCheck.CheckedChanged += OnTopmostChanged;
+        _topmostCheck.CheckedChanged += OnFrameCheckChanged;
 
         _frameTabPage.Controls.Add(_frameFLP);
     }
@@ -482,19 +482,16 @@ public partial class SettingsForm
         _prankNoRightClickCheck.AutoSize = true;
         _prankNoRightClickCheck.Text = Strings.CheckPrankNoRightClick;
         _prankNoRightClickCheck.UseVisualStyleBackColor = true;
-        _prankNoRightClickCheck.CheckedChanged += OnPrankNoRightClickChanged;
 
         // _prankNoHotkeyCheck
         _prankNoHotkeyCheck.AutoSize = true;
         _prankNoHotkeyCheck.Text = Strings.CheckPrankNoHotkey;
         _prankNoHotkeyCheck.UseVisualStyleBackColor = true;
-        _prankNoHotkeyCheck.CheckedChanged += OnPrankNoHotkeyChanged;
 
         // _prankNoCloseCheck
         _prankNoCloseCheck.AutoSize = true;
         _prankNoCloseCheck.Text = Strings.CheckPrankNoClose;
         _prankNoCloseCheck.UseVisualStyleBackColor = true;
-        _prankNoCloseCheck.CheckedChanged += OnPrankNoCloseChanged;
 
         _prankTabPage.Controls.Add(_prankFLP);
     }
