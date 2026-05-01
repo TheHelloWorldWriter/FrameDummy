@@ -37,28 +37,28 @@ public partial class SettingsForm : Form
         this.random = new Random();
 
         // Add frame border styles
-        foreach (FormBorderStyle style in Enum.GetValues(typeof(FormBorderStyle)))
+        foreach (FormBorderStyle style in Enum.GetValues<FormBorderStyle>())
         {
-            this.borderComboBox.Items.Add(style.ToString());
+            _borderComboBox.Items.Add(style.ToString());
         }
 
-        this.borderComboBox.SelectedIndex = 4;
+        _borderComboBox.SelectedIndex = 4;
 
         // Add frame border styles
-        foreach (PictureBoxSizeMode sizeMode in Enum.GetValues(typeof(PictureBoxSizeMode)))
+        foreach (PictureBoxSizeMode sizeMode in Enum.GetValues<PictureBoxSizeMode>())
         {
             if (sizeMode != PictureBoxSizeMode.AutoSize)
             {
-                this.imageSizingComboBox.Items.Add(sizeMode.ToString());
+                _imageSizingComboBox.Items.Add(sizeMode.ToString());
             }
         }
 
-        this.imageSizingComboBox.SelectedIndex = 3;
+        _imageSizingComboBox.SelectedIndex = 3;
 
-        this.titleTextBox.Text = Properties.Resources.StringDefaultTitle;
-        this.versionLabel.Text = string.Format(CultureInfo.CurrentCulture, this.versionLabel.Text, Application.ProductVersion);
+        _titleTextBox.Text = Strings.DefaultTitle;
+        _aboutVersionLabel.Text = string.Format(CultureInfo.CurrentCulture, _aboutVersionLabel.Text, Application.ProductVersion);
         string year = Math.Max(DateTime.Today.Year, 2015).ToString();
-        this.copyrightLabel.Text = string.Format(CultureInfo.CurrentCulture, this.copyrightLabel.Text, year);
+        _aboutCopyrightLabel.Text = string.Format(CultureInfo.CurrentCulture, _aboutCopyrightLabel.Text, year);
     }
 
     #endregion
@@ -71,7 +71,7 @@ public partial class SettingsForm : Form
     /// <param name="filePath">The image file name.</param>
     public void UpdateImageFilePath(string filePath)
     {
-        this.imageTextBox.Text = filePath;
+        _imageTextBox.Text = filePath;
     }
 
     /// <summary>
@@ -175,7 +175,7 @@ public partial class SettingsForm : Form
         this.Location = new Point(
             Math.Min(screen.WorkingArea.Width - this.Width, MainForm.TheMainForm.Right + 4),
             Math.Min(screen.WorkingArea.Height - this.Height, MainForm.TheMainForm.Top));*/
-        this.colorValueLabel.Height = this.colorBrowseButton.Height;
+        _colorValueLabel.Height = _colorBrowseButton.Height;
     }
 
     /// <summary>
@@ -188,7 +188,7 @@ public partial class SettingsForm : Form
     {
         if (e.KeyCode == Keys.Escape)
         {
-            this.Hide();
+            Hide();
             e.SuppressKeyPress = true;
         }
     }
@@ -203,7 +203,7 @@ public partial class SettingsForm : Form
     {
         if (e.CloseReason == CloseReason.UserClosing)
         {
-            this.Hide();
+            Hide();
             e.Cancel = true;
         }
     }
@@ -220,7 +220,7 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void OnTitleChanged(object? sender, EventArgs e)
     {
-        MainForm.TheMainForm.Text = this.titleTextBox.Text;
+        MainForm.TheMainForm.Text = _titleTextBox.Text;
     }
 
     /// <summary>
@@ -231,7 +231,7 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void OnIconBrowseClicked(object? sender, EventArgs e)
     {
-        this.openIconDialog.InitialDirectory = Path.GetDirectoryName(this.iconTextBox.Text);
+        this.openIconDialog.InitialDirectory = Path.GetDirectoryName(_iconTextBox.Text);
         if (this.openIconDialog.ShowDialog(this) == DialogResult.OK)
         {
             this.DoLoadIcon(this.openIconDialog.FileName);
@@ -246,7 +246,7 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void OnIconDefaultClicked(object? sender, EventArgs e)
     {
-        this.iconTextBox.Text = Properties.Resources.StringDefaultIcon;
+        _iconTextBox.Text = Strings.DefaultIcon;
         MainForm.TheMainForm.RestoreIcon();
     }
 
@@ -269,8 +269,8 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void OnOpacityChanged(object? sender, EventArgs e)
     {
-        MainForm.TheMainForm.Opacity = (double)this.opacityTrackBar.Value / 100;
-        this.opacityLabel.Text = string.Format(CultureInfo.CurrentCulture, "Opacity:\r\n{0:0%}", MainForm.TheMainForm.Opacity);
+        MainForm.TheMainForm.Opacity = (double)_opacityTrackBar.Value / 100;
+        _opacityLabel.Text = string.Format(CultureInfo.CurrentCulture, "Opacity:\r\n{0:0%}", MainForm.TheMainForm.Opacity);
     }
 
     /// <summary>
@@ -281,29 +281,29 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void OnFrameCheckChanged(object? sender, EventArgs e)
     {
-        if (sender == this.controlCheckBox)
+        if (sender == _controlBoxCheck)
         {
-            MainForm.TheMainForm.ControlBox = this.controlCheckBox.Checked;
+            MainForm.TheMainForm.ControlBox = _controlBoxCheck.Checked;
         }
-        else if (sender == this.iconCheckBox)
+        else if (sender == _showIconCheck)
         {
-            MainForm.TheMainForm.ShowIcon = this.iconCheckBox.Checked;
+            MainForm.TheMainForm.ShowIcon = _showIconCheck.Checked;
         }
-        else if (sender == this.minimizeCheckBox)
+        else if (sender == _minimizeBoxCheck)
         {
-            MainForm.TheMainForm.MinimizeBox = this.minimizeCheckBox.Checked;
+            MainForm.TheMainForm.MinimizeBox = _minimizeBoxCheck.Checked;
         }
-        else if (sender == this.maximizeCheckBox)
+        else if (sender == _maximizeBoxCheck)
         {
-            MainForm.TheMainForm.MaximizeBox = this.maximizeCheckBox.Checked;
+            MainForm.TheMainForm.MaximizeBox = _maximizeBoxCheck.Checked;
         }
-        else if (sender == this.taskbarCheckBox)
+        else if (sender == _showInTaskbarCheck)
         {
-            MainForm.TheMainForm.ShowInTaskbar = this.taskbarCheckBox.Checked;
+            MainForm.TheMainForm.ShowInTaskbar = _showInTaskbarCheck.Checked;
         }
-        else if (sender == this.topmostCheckBox)
+        else if (sender == _topmostCheck)
         {
-            MainForm.TheMainForm.TopMost = this.topmostCheckBox.Checked;
+            MainForm.TheMainForm.TopMost = _topmostCheck.Checked;
         }
     }
 
@@ -315,7 +315,7 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void OnCommandChanged(object? sender, EventArgs e)
     {
-        MainForm.TheMainForm.Cursor = string.IsNullOrEmpty(this.commandTextBox.Text) ? Cursors.Default : Cursors.Hand;
+        MainForm.TheMainForm.Cursor = string.IsNullOrEmpty(_commandTextBox.Text) ? Cursors.Default : Cursors.Hand;
     }
 
     #endregion
@@ -330,7 +330,7 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void OnImageBrowseClicked(object? sender, EventArgs e)
     {
-        this.openImageDialog.InitialDirectory = Path.GetDirectoryName(this.imageTextBox.Text);
+        this.openImageDialog.InitialDirectory = Path.GetDirectoryName(_imageTextBox.Text);
         if (this.openImageDialog.ShowDialog(this) == DialogResult.OK)
         {
             this.DoLoadImage(this.openImageDialog.FileName);
@@ -358,7 +358,7 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void OnImageSizingChanged(object? sender, EventArgs e)
     {
-        MainForm.TheMainForm.SetSizeMode((PictureBoxSizeMode)Enum.Parse(typeof(PictureBoxSizeMode), this.imageSizingComboBox.SelectedItem.ToString()));
+        MainForm.TheMainForm.SetSizeMode(Enum.Parse<PictureBoxSizeMode>(this._imageSizingComboBox.SelectedItem.ToString()));
     }
 
     /// <summary>
@@ -380,7 +380,7 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void OnColorValueChanged(object? sender, EventArgs e)
     {
-        MainForm.TheMainForm.SetColor(this.colorValueLabel.BackColor, this.colorTransparentCheckBox.Checked);
+        MainForm.TheMainForm.SetColor(_colorValueLabel.BackColor, _colorTransparentCheck.Checked);
     }
 
     /// <summary>
@@ -391,7 +391,7 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void OnColorRandomClicked(object? sender, EventArgs e)
     {
-        this.colorValueLabel.BackColor = Color.FromArgb(this.random.Next(256), this.random.Next(256), this.random.Next(256));
+        this._colorValueLabel.BackColor = Color.FromArgb(random.Next(256), random.Next(256), random.Next(256));
     }
 
     /// <summary>
@@ -402,10 +402,10 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void OnColorBrowseClicked(object? sender, EventArgs e)
     {
-        this.colorDialog.Color = this.colorValueLabel.BackColor;
+        this.colorDialog.Color = _colorValueLabel.BackColor;
         if (this.colorDialog.ShowDialog(this) == DialogResult.OK)
         {
-            this.colorValueLabel.BackColor = this.colorDialog.Color;
+            _colorValueLabel.BackColor = this.colorDialog.Color;
         }
     }
 
@@ -417,7 +417,7 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void OnColorTransparentChanged(object? sender, EventArgs e)
     {
-        MainForm.TheMainForm.TransparencyKey = this.colorTransparentCheckBox.Checked ? this.colorValueLabel.BackColor : Color.Empty;
+        MainForm.TheMainForm.TransparencyKey = _colorTransparentCheck.Checked ? _colorValueLabel.BackColor : Color.Empty;
     }
 
     #endregion
@@ -432,7 +432,7 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void OnAboutUrlClicked(object? sender, LinkLabelLinkClickedEventArgs e)
     {
-        Process.Start(this.urlLinkLabel.Text);
+        Process.Start(_aboutUrlLink.Text);
     }
 
     #endregion
@@ -445,11 +445,11 @@ public partial class SettingsForm : Form
     /// <param name="iconFilePath">The icon file path.</param>
     private void DoLoadIcon(string iconFilePath)
     {
-        if (!(string.IsNullOrEmpty(iconFilePath) || iconFilePath.Equals(Properties.Resources.StringDefaultIcon)))
+        if (!(string.IsNullOrEmpty(iconFilePath) || iconFilePath.Equals(Strings.DefaultIcon)))
         {
             if (MainForm.TheMainForm.LoadIcon(iconFilePath))
             {
-                this.iconTextBox.Text = iconFilePath;
+                _iconTextBox.Text = iconFilePath;
             }
         }
     }
@@ -460,11 +460,11 @@ public partial class SettingsForm : Form
     /// <param name="imageFilePath">The image file path.</param>
     private void DoLoadImage(string imageFilePath)
     {
-        if (!(string.IsNullOrEmpty(imageFilePath) || imageFilePath.Equals(Properties.Resources.StringNoImage) || imageFilePath.Equals(Properties.Resources.StringPastedImage)))
+        if (!(string.IsNullOrEmpty(imageFilePath) || imageFilePath.Equals(Strings.NoImage) || imageFilePath.Equals(Strings.PastedImage)))
         {
             if (MainForm.TheMainForm.LoadImage(imageFilePath))
             {
-                this.imageTextBox.Text = imageFilePath;
+                _imageTextBox.Text = imageFilePath;
             }
         }
     }
