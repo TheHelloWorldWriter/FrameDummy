@@ -219,10 +219,10 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void OnIconBrowseClicked(object? sender, EventArgs e)
     {
-        this.openIconDialog.InitialDirectory = Path.GetDirectoryName(_iconTextBox.Text);
-        if (this.openIconDialog.ShowDialog(this) == DialogResult.OK)
+        _openIconDialog.InitialDirectory = Path.GetDirectoryName(_iconTextBox.Text);
+        if (_openIconDialog.ShowDialog(this) == DialogResult.OK)
         {
-            this.DoLoadIcon(this.openIconDialog.FileName);
+            this.DoLoadIcon(_openIconDialog.FileName);
         }
     }
 
@@ -318,10 +318,10 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void OnImageBrowseClicked(object? sender, EventArgs e)
     {
-        this.openImageDialog.InitialDirectory = Path.GetDirectoryName(_imageTextBox.Text);
-        if (this.openImageDialog.ShowDialog(this) == DialogResult.OK)
+        _openImageDialog.InitialDirectory = Path.GetDirectoryName(_imageTextBox.Text);
+        if (_openImageDialog.ShowDialog(this) == DialogResult.OK)
         {
-            this.DoLoadImage(this.openImageDialog.FileName);
+            this.DoLoadImage(_openImageDialog.FileName);
         }
     }
 
@@ -375,8 +375,6 @@ public partial class SettingsForm : Form
     /// Event -> Color Random Button -> Click
     /// Sets the main form picture box background color to a new random color.
     /// </summary>
-    /// <param name="sender">The sender of the event.</param>
-    /// <param name="e">Empty event data.</param>
     private void OnColorRandomClicked(object? sender, EventArgs e)
     {
         _colorValueLabel.BackColor = Utils.RandomColor();
@@ -390,10 +388,10 @@ public partial class SettingsForm : Form
     /// <param name="e">Empty event data.</param>
     private void OnColorBrowseClicked(object? sender, EventArgs e)
     {
-        this.colorDialog.Color = _colorValueLabel.BackColor;
-        if (this.colorDialog.ShowDialog(this) == DialogResult.OK)
+        _colorDialog.Color = _colorValueLabel.BackColor;
+        if (_colorDialog.ShowDialog(this) == DialogResult.OK)
         {
-            _colorValueLabel.BackColor = this.colorDialog.Color;
+            _colorValueLabel.BackColor = _colorDialog.Color;
         }
     }
 

@@ -65,6 +65,23 @@ public partial class SettingsForm
     FlowLayoutPanel _prankFLP = new();
     FlowLayoutPanel _aboutFLP = new();
 
+    // Non-visible dialog components - disposed manually in Dispose (not in the Controls hierarchy).
+    OpenFileDialog _openIconDialog = new() { Title = Strings.IconDialogTitle, Filter = Strings.IconDialogFilter };
+    OpenFileDialog _openImageDialog = new() { Title = Strings.ImageDialogTitle, Filter = Strings.ImageDialogFilter };
+    ColorDialog _colorDialog = new();
+
+    /// <summary>Disposes the non-visible dialog components. Visible controls are disposed by the Form's transitive walk through Controls.</summary>
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _openIconDialog.Dispose();
+            _openImageDialog.Dispose();
+            _colorDialog.Dispose();
+        }
+        base.Dispose(disposing);
+    }
+
     /// <summary>Builds the entire layout: suspend, configure each section, add the tab control to the form, resume.</summary>
     void BuildLayout()
     {
