@@ -35,9 +35,6 @@ public partial class MainForm : Form
     /// </summary>
     public MainForm()
     {
-        // Set the form's font to the default operating system font (Segoe UI on Vista)
-        Font = SystemFonts.MessageBoxFont;
-
         // Required method for designer support
         InitializeComponent();
 

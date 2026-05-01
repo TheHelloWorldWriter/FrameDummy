@@ -18,9 +18,6 @@ public partial class SettingsForm : Form
     /// </summary>
     public SettingsForm()
     {
-        // Set the form's font to the default operating system font (Segoe UI on Vista)
-        Font = SystemFonts.MessageBoxFont;
-
         // Required method for designer support
         InitializeComponent();
 
