@@ -11,7 +11,7 @@ static class Program
     static void Main()
     {
         ApplicationConfiguration.Initialize();
-        // Application.SetColorMode(SystemColorMode.System);
+        Application.SetColorMode(SystemColorMode.System);
         Application.Run(new MainForm());
     }
 }

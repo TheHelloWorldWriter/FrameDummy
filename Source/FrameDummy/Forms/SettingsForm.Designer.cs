@@ -93,7 +93,7 @@
             //
             // frameFlowLayoutPanel
             //
-            this.frameFlowLayoutPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.frameFlowLayoutPanel.BackColor = System.Drawing.SystemColors.Control;
             this.frameFlowLayoutPanel.Controls.Add(this.titleLabel);
             this.frameFlowLayoutPanel.Controls.Add(this.titleTextBox);
             this.frameFlowLayoutPanel.Controls.Add(this.iconLabel);
@@ -443,7 +443,7 @@
             //
             // contentFlowLayoutPanel
             //
-            this.contentFlowLayoutPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.contentFlowLayoutPanel.BackColor = System.Drawing.SystemColors.Control;
             this.contentFlowLayoutPanel.Controls.Add(this.imageLabel);
             this.contentFlowLayoutPanel.Controls.Add(this.imageTextBox);
             this.contentFlowLayoutPanel.Controls.Add(this.imageBrowseButton);
@@ -538,7 +538,7 @@
             //
             // prankFlowLayoutPanel
             //
-            this.prankFlowLayoutPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.prankFlowLayoutPanel.BackColor = System.Drawing.SystemColors.Control;
             this.prankFlowLayoutPanel.Controls.Add(this.commandLabel);
             this.prankFlowLayoutPanel.Controls.Add(this.commandTextBox);
             this.prankFlowLayoutPanel.Controls.Add(this.label1);
@@ -629,7 +629,7 @@
             //
             // flowLayoutPanel1
             //
-            this.flowLayoutPanel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.flowLayoutPanel1.BackColor = System.Drawing.SystemColors.Control;
             this.flowLayoutPanel1.Controls.Add(this.aboutNameLabel);
             this.flowLayoutPanel1.Controls.Add(this.versionLabel);
             this.flowLayoutPanel1.Controls.Add(this.copyrightLabel);
@@ -676,6 +676,7 @@
             // urlLinkLabel
             //
             this.urlLinkLabel.AutoSize = true;
+            this.urlLinkLabel.LinkColor = System.Drawing.SystemColors.HotTrack;
             this.urlLinkLabel.Location = new System.Drawing.Point(23, 100);
             this.urlLinkLabel.Name = "urlLinkLabel";
             this.urlLinkLabel.Size = new System.Drawing.Size(191, 17);
@@ -689,7 +690,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.BackColor = System.Drawing.Color.Gainsboro;
+            this.BackColor = System.Drawing.SystemColors.ControlLight;
             this.ClientSize = new System.Drawing.Size(623, 371);
             this.Controls.Add(this.settingsTabControl);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
