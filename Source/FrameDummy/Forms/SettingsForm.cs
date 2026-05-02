@@ -156,10 +156,6 @@ public partial class SettingsForm : Form
     /// <param name="e">Keyboard event data.</param>
     private void EventSettingsFormShown(object sender, EventArgs e)
     {
-        /*Screen screen = Screen.FromControl(MainForm.TheMainForm);
-        this.Location = new Point(
-            Math.Min(screen.WorkingArea.Width - this.Width, MainForm.TheMainForm.Right + 4),
-            Math.Min(screen.WorkingArea.Height - this.Height, MainForm.TheMainForm.Top));*/
         colorValueLabel.Height = colorBrowseButton.Height;
     }
 
