@@ -124,6 +124,10 @@ public partial class SettingsForm : Form
 
             iniFile.SetValue(commandTextBox.Name, commandTextBox.Text);
 
+            // The three prank lock-out flags (prankNoSettingsRightClickCheckBox, prankNoSettingsHotkeyCheckBox,
+            // prankNoCloseCheckBox) are intentionally not persisted, so a restart always restores access to Settings
+            // and to closing the window
+
             iniFile.SetValue(imageTextBox.Name, imageTextBox.Text);
             iniFile.SetValue(imageSizingComboBox.Name, imageSizingComboBox.SelectedIndex);
             iniFile.SetValue(colorValueLabel.Name, ColorTranslator.ToHtml(colorValueLabel.BackColor));
