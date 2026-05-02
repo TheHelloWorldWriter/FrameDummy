@@ -2,6 +2,31 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "build (semantic gate)",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "Source/FrameDummy.slnx"
+      ],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "format: verify-no-changes (style gate)",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "format",
+        "Source/FrameDummy.slnx",
+        "--verify-no-changes",
+        "--severity",
+        "info"
+      ],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
       "label": "publish: framework-dependent (small)",
       "type": "process",
       "command": "dotnet",
