@@ -69,12 +69,12 @@
             this.prankFlowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.commandLabel = new System.Windows.Forms.Label();
             this.commandTextBox = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.prankIntroLabel = new System.Windows.Forms.Label();
             this.prankNoSettingsRightClickCheckBox = new System.Windows.Forms.CheckBox();
             this.prankNoSettingsHotkeyCheckBox = new System.Windows.Forms.CheckBox();
             this.prankNoCloseCheckBox = new System.Windows.Forms.CheckBox();
             this.aboutTabPage = new System.Windows.Forms.TabPage();
-            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.aboutFlowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.aboutNameLabel = new System.Windows.Forms.Label();
             this.versionLabel = new System.Windows.Forms.Label();
             this.copyrightLabel = new System.Windows.Forms.Label();
@@ -88,7 +88,7 @@
             this.prankTabPage.SuspendLayout();
             this.prankFlowLayoutPanel.SuspendLayout();
             this.aboutTabPage.SuspendLayout();
-            this.flowLayoutPanel1.SuspendLayout();
+            this.aboutFlowLayoutPanel.SuspendLayout();
             this.SuspendLayout();
             //
             // frameFlowLayoutPanel
@@ -504,7 +504,6 @@
             //
             // frameTabPage
             //
-            this.frameTabPage.BackColor = System.Drawing.Color.Transparent;
             this.frameTabPage.Controls.Add(this.frameFlowLayoutPanel);
             this.frameTabPage.Location = new System.Drawing.Point(4, 25);
             this.frameTabPage.Name = "frameTabPage";
@@ -541,7 +540,7 @@
             this.prankFlowLayoutPanel.BackColor = System.Drawing.SystemColors.Control;
             this.prankFlowLayoutPanel.Controls.Add(this.commandLabel);
             this.prankFlowLayoutPanel.Controls.Add(this.commandTextBox);
-            this.prankFlowLayoutPanel.Controls.Add(this.label1);
+            this.prankFlowLayoutPanel.Controls.Add(this.prankIntroLabel);
             this.prankFlowLayoutPanel.Controls.Add(this.prankNoSettingsRightClickCheckBox);
             this.prankFlowLayoutPanel.Controls.Add(this.prankNoSettingsHotkeyCheckBox);
             this.prankFlowLayoutPanel.Controls.Add(this.prankNoCloseCheckBox);
@@ -573,16 +572,16 @@
             this.commandTextBox.TabIndex = 18;
             this.commandTextBox.TextChanged += new System.EventHandler(this.EventCommandTextBoxTextChanged);
             //
-            // label1
+            // prankIntroLabel
             //
-            this.label1.AutoSize = true;
-            this.prankFlowLayoutPanel.SetFlowBreak(this.label1, true);
-            this.label1.Location = new System.Drawing.Point(20, 77);
-            this.label1.Margin = new System.Windows.Forms.Padding(0, 0, 0, 15);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(440, 17);
-            this.label1.TabIndex = 22;
-            this.label1.Text = "Use these settings to hide all clues of the identity of the fake window:";
+            this.prankIntroLabel.AutoSize = true;
+            this.prankFlowLayoutPanel.SetFlowBreak(this.prankIntroLabel, true);
+            this.prankIntroLabel.Location = new System.Drawing.Point(20, 77);
+            this.prankIntroLabel.Margin = new System.Windows.Forms.Padding(0, 0, 0, 15);
+            this.prankIntroLabel.Name = "prankIntroLabel";
+            this.prankIntroLabel.Size = new System.Drawing.Size(440, 17);
+            this.prankIntroLabel.TabIndex = 22;
+            this.prankIntroLabel.Text = "Use these settings to hide all clues of the identity of the fake window:";
             //
             // prankNoSettingsRightClickCheckBox
             //
@@ -618,7 +617,7 @@
             //
             // aboutTabPage
             //
-            this.aboutTabPage.Controls.Add(this.flowLayoutPanel1);
+            this.aboutTabPage.Controls.Add(this.aboutFlowLayoutPanel);
             this.aboutTabPage.Location = new System.Drawing.Point(4, 25);
             this.aboutTabPage.Name = "aboutTabPage";
             this.aboutTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -627,20 +626,20 @@
             this.aboutTabPage.Text = "About";
             this.aboutTabPage.UseVisualStyleBackColor = true;
             //
-            // flowLayoutPanel1
+            // aboutFlowLayoutPanel
             //
-            this.flowLayoutPanel1.BackColor = System.Drawing.SystemColors.Control;
-            this.flowLayoutPanel1.Controls.Add(this.aboutNameLabel);
-            this.flowLayoutPanel1.Controls.Add(this.versionLabel);
-            this.flowLayoutPanel1.Controls.Add(this.copyrightLabel);
-            this.flowLayoutPanel1.Controls.Add(this.urlLinkLabel);
-            this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
-            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Padding = new System.Windows.Forms.Padding(20);
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(569, 296);
-            this.flowLayoutPanel1.TabIndex = 0;
+            this.aboutFlowLayoutPanel.BackColor = System.Drawing.SystemColors.Control;
+            this.aboutFlowLayoutPanel.Controls.Add(this.aboutNameLabel);
+            this.aboutFlowLayoutPanel.Controls.Add(this.versionLabel);
+            this.aboutFlowLayoutPanel.Controls.Add(this.copyrightLabel);
+            this.aboutFlowLayoutPanel.Controls.Add(this.urlLinkLabel);
+            this.aboutFlowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.aboutFlowLayoutPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
+            this.aboutFlowLayoutPanel.Location = new System.Drawing.Point(3, 3);
+            this.aboutFlowLayoutPanel.Name = "aboutFlowLayoutPanel";
+            this.aboutFlowLayoutPanel.Padding = new System.Windows.Forms.Padding(20);
+            this.aboutFlowLayoutPanel.Size = new System.Drawing.Size(569, 296);
+            this.aboutFlowLayoutPanel.TabIndex = 0;
             //
             // aboutNameLabel
             //
@@ -717,8 +716,8 @@
             this.prankFlowLayoutPanel.ResumeLayout(false);
             this.prankFlowLayoutPanel.PerformLayout();
             this.aboutTabPage.ResumeLayout(false);
-            this.flowLayoutPanel1.ResumeLayout(false);
-            this.flowLayoutPanel1.PerformLayout();
+            this.aboutFlowLayoutPanel.ResumeLayout(false);
+            this.aboutFlowLayoutPanel.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -764,7 +763,7 @@
         private System.Windows.Forms.FlowLayoutPanel prankFlowLayoutPanel;
         private System.Windows.Forms.Label commandLabel;
         private System.Windows.Forms.TabPage aboutTabPage;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        private System.Windows.Forms.FlowLayoutPanel aboutFlowLayoutPanel;
         private System.Windows.Forms.Label aboutNameLabel;
         private System.Windows.Forms.Label versionLabel;
         private System.Windows.Forms.Label copyrightLabel;
@@ -773,7 +772,7 @@
         internal System.Windows.Forms.CheckBox prankNoSettingsRightClickCheckBox;
         internal System.Windows.Forms.CheckBox prankNoSettingsHotkeyCheckBox;
         internal System.Windows.Forms.TextBox commandTextBox;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label prankIntroLabel;
         private System.Windows.Forms.Button iconDefaultButton;
 
     }
